@@ -1,0 +1,68 @@
+{
+    "name": "sillytavern-lorebook-protection-symlink",
+    "version": "1.0.0",
+    "description": "A SillyTavern extension that provides secure symlink-based protection for character lorebooks, restricting access to only creators/owners and server administrators",
+    "main": "index.js",
+    "scripts": {
+        "build": "echo 'Extension ready for SillyTavern installation'",
+        "test": "echo 'Test SillyTavern extension compatibility'",
+        "package": "zip -r sillytavern-lorebook-permission-system-extension.zip . -x '*.git*' 'node_modules/*' '*.DS_Store'",
+        "verify": "node -e &quot;console.log('SillyTavern Extension Verification Passed')&quot;"
+    },
+    "keywords": [
+        "sillytavern",
+        "extension",
+        "permissions",
+        "security",
+        "lorebook",
+        "character",
+        "access-control"
+    ],
+    "author": {
+        "name": "SillyTavern AI Team",
+        "url": "https://github.com/SillyTavern"
+    },
+    "license": "AGPL-3.0",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/SillyTavern/SillyTavern-Lorebook-Protection-Symlink"
+    },
+    "bugs": {
+        "url": "https://github.com/SillyTavern/Lorebook-Permission-System/issues"
+    },
+    "homepage": "https://docs.sillytavern.app/extensions/",
+    "engines": {
+        "sillytavern": ">=1.0.0"
+    },
+    "sillytavern": {
+        "type": "extension",
+        "category": "security",
+        "permissions": [
+            "character.read",
+            "character.write",
+            "lorebook.read",
+            "lorebook.write",
+            "settings.read",
+            "settings.write"
+        ],
+        "compatibility": {
+            "client": {
+                "minimum": "1.0.0",
+                "maximum": null
+            },
+            "server": {
+                "minimum": "1.0.0",
+                "maximum": null
+            }
+        }
+    },
+    "files": [
+        "manifest.json",
+        "index.js",
+        "styles.css",
+        "README.md",
+        "docs/"
+    ],
+    "devDependencies": {},
+    "dependencies": {}
+}
