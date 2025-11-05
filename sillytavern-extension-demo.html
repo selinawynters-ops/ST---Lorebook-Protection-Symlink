@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SillyTavern - SillyTavern Lorebook Protection Symlink Extension Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .demo-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .extension-icon {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .demo-sections {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        .demo-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .demo-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* SillyTavern Extension Manager */
+        .extension-manager {
+            background: #2d3748;
+            border-radius: 10px;
+            padding: 20px;
+            color: white;
+        }
+
+        .extension-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #4a5568;
+        }
+
+        .extension-tab {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            color: #a0aec0;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .extension-tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .extension-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .extension-item {
+            background: #4a5568;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .extension-item:hover {
+            background: #5a6578;
+            transform: translateY(-2px);
+        }
+
+        .extension-item.our-extension {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .extension-item-icon {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .extension-item-info {
+            flex: 1;
+        }
+
+        .extension-item-name {
+            font-weight: 600;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .extension-item-author {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .extension-item-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .extension-toggle {
+            position: relative;
+            width: 50px;
+            height: 25px;
+            background: #718096;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .extension-toggle.enabled {
+            background: #48bb78;
+        }
+
+        .extension-toggle::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 21px;
+            height: 21px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .extension-toggle.enabled::after {
+            transform: translateX(25px);
+        }
+
+        /* Permission Management Interface */
+        .permission-interface {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .permission-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .permission-header h3 {
+            font-size: 1.3em;
+        }
+
+        .permission-content {
+            padding: 20px;
+        }
+
+        .permission-tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            background: #f1f3f4;
+            border-radius: 8px;
+            padding: 5px;
+        }
+
+        .permission-tab {
+            padding: 8px 16px;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .permission-tab.active {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            color: #667eea;
+        }
+
+        .permission-form {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group select,
+        .form-group input {
+            padding: 10px;
+            border: 2px solid #e1e5e9;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .permission-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e1e5e9;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d1d5d9;
+        }
+
+        .permission-list {
+            border-top: 2px solid #f1f3f4;
+            padding-top: 20px;
+        }
+
+        .permission-item {
+            background: #f8f9fa;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .permission-item-character {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .permission-item-info {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .permission-item-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-small {
+            padding: 4px 8px;
+            font-size: 12px;
+            border-radius: 4px;
+            border: 1px solid #e1e5e9;
+            background: white;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-small:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        /* Installation Steps */
+        .installation-steps {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .step {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            width: 30px;
+            height: 30px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .step-description {
+            color: #666;
+            line-height: 1.5;
+        }
+
+        /* Status Indicators */
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-indicator.secured {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-indicator.restricted {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Alert Messages */
+        .alert {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        /* Character Settings Integration */
+        .character-settings {
+            background: #2d3748;
+            border-radius: 10px;
+            padding: 20px;
+            color: white;
+        }
+
+        .settings-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .menu-button {
+            background: #4a5568;
+            border: none;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .menu-button:hover {
+            background: #5a6578;
+            transform: translateX(5px);
+        }
+
+        .menu-button.permission-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-weight: 600;
+        }
+
+        .menu-button.permission-button:hover {
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Demo Controls */
+        .demo-controls {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #e1e5e9;
+        }
+
+        .demo-controls button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+        }
+
+        .demo-controls button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .demo-sections {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="header">
+            <h1>
+                <div class="extension-icon">🔐</div>
+                SillyTavern SillyTavern Lorebook Protection Symlink Extension Demo
+            </h1>
+            <p>Visual demonstration of how the extension appears and functions in SillyTavern</p>
+        </div>
+
+        <div class="demo-sections">
+            <!-- Extension Manager Section -->
+            <div class="demo-section">
+                <h2>📦 Extension Manager Installation</h2>
+                <div class="extension-manager">
+                    <div class="extension-tabs">
+                        <button class="extension-tab active">Installed</button>
+                        <button class="extension-tab">Available</button>
+                        <button class="extension-tab">Install Extension</button>
+                    </div>
+                    
+                    <div class="extension-list">
+                        <div class="extension-item">
+                            <div class="extension-item-icon">🎨</div>
+                            <div class="extension-item-info">
+                                <div class="extension-item-name">Character Card Editor</div>
+                                <div class="extension-item-author">SillyTavern Team</div>
+                            </div>
+                            <div class="extension-item-status">
+                                <div class="extension-toggle enabled"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="extension-item">
+                            <div class="extension-item-icon">💬</div>
+                            <div class="extension-item-info">
+                                <div class="extension-item-name">Chat Enhancements</div>
+                                <div class="extension-item-author">Community</div>
+                            </div>
+                            <div class="extension-item-status">
+                                <div class="extension-toggle"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="extension-item our-extension">
+                            <div class="extension-item-icon">🔐</div>
+                            <div class="extension-item-info">
+                                <div class="extension-item-name" id="extension-name-display">SillyTavern Lorebook Protection Symlink</div>
+                                <div class="extension-item-author">SillyTavern AI Team</div>
+                            </div>
+                            <div class="extension-item-status">
+                                <div class="extension-toggle enabled"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Examples of how it looks on different servers -->
+                        <div style="margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 8px;">
+                            <div style="font-size: 12px; opacity: 0.8; margin-bottom: 8px;">💡 Dynamic naming examples:</div>
+                            <div style="font-size: 11px; opacity: 0.7;">
+                                • "ST--" → "ST-- Lorebook Protection Symlink"<br>
+                                • "MyTavern" → "MyTavern Lorebook Protection Symlink"<br>
+                                • "RoleplayHub" → "RoleplayHub Lorebook Protection Symlink"
+                            </div>
+                        </div>
+                        
+                        <div class="extension-item">
+                            <div class="extension-item-icon">🌍</div>
+                            <div class="extension-item-info">
+                                <div class="extension-item-name">World Info Manager</div>
+                                <div class="extension-item-author">SillyTavern Team</div>
+                            </div>
+                            <div class="extension-item-status">
+                                <div class="extension-toggle enabled"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Character Settings Integration -->
+            <div class="demo-section">
+                <h2>⚙️ Character Settings Integration</h2>
+                <div class="character-settings">
+                    <h3 style="margin-bottom: 15px;">Character Settings Panel</h3>
+                    <div class="settings-menu">
+                        <button class="menu-button">
+                            <span>👤</span> Edit Character Card
+                        </button>
+                        <button class="menu-button">
+                            <span>🎨</span> Change Avatar
+                        </button>
+                        <button class="menu-button">
+                            <span>📝</span> Edit Description
+                        </button>
+                        <button class="menu-button">
+                            <span>🌍</span> World Info Settings
+                        </button>
+                        <button class="menu-button permission-button" onclick="openPermissionModal()">
+                            <span>🔐</span> <span id="button-name-display">SillyTavern Lorebook Protection Symlink</span>
+                        </button>
+                        <button class="menu-button">
+                            <span>📤</span> Export Character
+                        </button>
+                        <button class="menu-button">
+                            <span>🗑️</span> Delete Character
+                        </button>
+                    </div>
+                    
+                    <div class="alert alert-success" style="margin-top: 15px;">
+                        <span>✅</span>
+                        <span>🔐 <strong>Secured</strong> - Your lorebook is protected by permissions</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Permission Management Interface -->
+            <div class="demo-section">
+                <h2>🔐 Permission Management Interface</h2>
+                <div class="permission-interface">
+                    <div class="permission-header">
+                        <div class="extension-icon" style="width: 40px; height: 40px; font-size: 20px;">🔐</div>
+                        <div>
+                            <h3 id="modal-title-display">SillyTavern Lorebook Protection Symlink</h3>
+                            <div>Manage access to character lorebooks</div>
+                        </div>
+                    </div>
+                    
+                    <div class="permission-content">
+                        <div class="permission-tabs">
+                            <button class="permission-tab active" onclick="switchTab(this, 'permissions')">Permissions</button>
+                            <button class="permission-tab" onclick="switchTab(this, 'logs')">Access Logs</button>
+                            <button class="permission-tab" onclick="switchTab(this, 'settings')">Settings</button>
+                        </div>
+                        
+                        <div id="permissions-tab" class="tab-content">
+                            <div class="permission-form">
+                                <div class="form-group">
+                                    <label>Character:</label>
+                                    <select>
+                                        <option>Aria Starweaver</option>
+                                        <option>Marcus Blade</option>
+                                        <option>Luna Nightshade</option>
+                                        <option>Professor Quantum</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>User ID:</label>
+                                    <input type="text" placeholder="Enter username or user ID" value="player123">
+                                </div>
+                                
+                                <div class="permission-actions">
+                                    <button class="btn btn-primary" onclick="grantPermission()">
+                                        Grant Access
+                                    </button>
+                                    <button class="btn btn-secondary" onclick="revokePermission()">
+                                        Revoke Access
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="permission-list">
+                                <h4 style="margin-bottom: 10px;">Current Permissions:</h4>
+                                
+                                <div class="permission-item">
+                                    <div>
+                                        <div class="permission-item-character">📖 Aria Starweaver</div>
+                                        <div class="permission-item-info">
+                                            Owner: creator_user | Allowed Users: player123, writer456
+                                        </div>
+                                    </div>
+                                    <div class="permission-item-actions">
+                                        <button class="btn-small">Edit</button>
+                                        <button class="btn-small">View Logs</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="permission-item">
+                                    <div>
+                                        <div class="permission-item-character">📖 Marcus Blade</div>
+                                        <div class="permission-item-info">
+                                            Owner: creator_user | Allowed Users: gm_user
+                                        </div>
+                                    </div>
+                                    <div class="permission-item-actions">
+                                        <button class="btn-small">Edit</button>
+                                        <button class="btn-small">View Logs</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="permission-item">
+                                    <div>
+                                        <div class="permission-item-character">📖 Luna Nightshade</div>
+                                        <div class="permission-item-info">
+                                            Owner: creator_user | Allowed Users: None (Owner Only)
+                                        </div>
+                                    </div>
+                                    <div class="permission-item-actions">
+                                        <button class="btn-small">Edit</button>
+                                        <button class="btn-small">View Logs</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="logs-tab" class="tab-content" style="display: none;">
+                            <div class="alert alert-info">
+                                <span>📊</span>
+                                <span>Access logs show all attempts to view character lorebooks</span>
+                            </div>
+                            
+                            <div class="permission-list">
+                                <h4 style="margin-bottom: 10px;">Recent Access Attempts:</h4>
+                                
+                                <div class="permission-item">
+                                    <div>
+                                        <div class="permission-item-character">✅ Successful Access</div>
+                                        <div class="permission-item-info">
+                                            User: player123 | Character: Aria Starweaver | Time: 2 minutes ago
+                                        </div>
+                                    </div>
+                                    <div class="status-indicator secured">Allowed</div>
+                                </div>
+                                
+                                <div class="permission-item">
+                                    <div>
+                                        <div class="permission-item-character">❌ Access Denied</div>
+                                        <div class="permission-item-info">
+                                            User: unknown_user | Character: Marcus Blade | Time: 15 minutes ago
+                                        </div>
+                                    </div>
+                                    <div class="status-indicator restricted">Denied</div>
+                                </div>
+                                
+                                <div class="permission-item">
+                                    <div>
+                                        <div class="permission-item-character">✅ Admin Override</div>
+                                        <div class="permission-item-info">
+                                            User: admin_user | Character: Luna Nightshade | Time: 1 hour ago
+                                        </div>
+                                    </div>
+                                    <div class="status-indicator secured">Allowed</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="settings-tab" class="tab-content" style="display: none;">
+                            <div class="permission-form">
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" checked> Enable Permission Enforcement
+                                    </label>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" checked> Log Access Attempts
+                                    </label>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" checked> Admin Override Enabled
+                                    </label>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" checked> Show Permission Warnings
+                                    </label>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Default Permission Level:</label>
+                                    <select>
+                                        <option>Owner Only</option>
+                                        <option>Admin + Owner</option>
+                                        <option>Custom Rules</option>
+                                    </select>
+                                </div>
+                                
+                                <button class="btn btn-primary">Save Settings</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Installation Steps -->
+            <div class="demo-section">
+                <h2>🚀 Installation Process</h2>
+                <div class="installation-steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <div class="step-title">Download Extension ZIP</div>
+                            <div class="step-description">
+                                Get the <strong>sillytavern-lorebook-permission-system-extension.zip</strong> file 
+                                containing the properly formatted SillyTavern extension.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <div class="step-title">Open Extension Manager</div>
+                            <div class="step-description">
+                                In SillyTavern, navigate to <strong>Settings → Extensions</strong> and click 
+                                the "Install Extension" button.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <div class="step-title">Upload ZIP File</div>
+                            <div class="step-description">
+                                Select the downloaded ZIP file and click "Install". SillyTavern will automatically 
+                                extract and register the extension.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <div class="step-title">Enable Extension</div>
+                            <div class="step-description">
+                                Toggle the "SillyTavern Lorebook Protection Symlink" extension to the ON position in the 
+                                extensions list.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">5</div>
+                        <div class="step-content">
+                            <div class="step-title">Restart SillyTavern</div>
+                            <div class="step-description">
+                                Refresh your browser or restart SillyTavern to activate all extension features 
+                                and load the permission system.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">✅</div>
+                        <div class="step-content">
+                            <div class="step-title">Ready to Use!</div>
+                            <div class="step-description">
+                                The "🔐 Lorebook Permissions" button will appear in character settings, 
+                                and your lorebooks are now protected by enterprise-grade security.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-success">
+                        <span>✅</span>
+                        <span><strong>Success!</strong> Extension is properly installed and integrated into SillyTavern's extension system.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Demo Controls -->
+        <div class="demo-controls">
+            <button onclick="simulateInstall()">🔄 Simulate Installation Process</button>
+            <button onclick="openPermissionModal()">🔐 Open Permission Modal</button>
+            <button onclick="showAccessDenied()">🚫 Simulate Access Denied</button>
+            <button onclick="showAccessGranted()">✅ Simulate Access Granted</button>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(element, tabName) {
+            // Remove active class from all tabs
+            document.querySelectorAll('.permission-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Add active class to clicked tab
+            element.classList.add('active');
+            
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName + '-tab').style.display = 'block';
+        }
+
+        function openPermissionModal() {
+            // Simulate opening permission modal
+            alert('🔐 Permission Management Modal would open here with full interface for managing character lorebook access permissions.');
+            
+            // Switch to permissions tab
+            const permissionsTab = document.querySelector('.permission-tab');
+            switchTab(permissionsTab, 'permissions');
+        }
+
+        function grantPermission() {
+            alert('✅ Permission granted successfully!\n\nUser: player123\nCharacter: Aria Starweaver\nAccess Level: Read');
+        }
+
+        function revokePermission() {
+            alert('❌ Permission revoked!\n\nUser: player123\nCharacter: Aria Starweaver\nReason: Admin action');
+        }
+
+        function simulateInstall() {
+            const toggle = document.querySelector('.our-extension .extension-toggle');
+            if (!toggle.classList.contains('enabled')) {
+                toggle.classList.add('enabled');
+                alert('✅ Extension installed and enabled successfully!\n\nThe SillyTavern Lorebook Protection Symlink is now active in your SillyTavern.');
+            } else {
+                toggle.classList.remove('enabled');
+                alert('🔄 Extension disabled. Toggle it on to activate permission protection.');
+            }
+        }
+
+        function showAccessDenied() {
+            alert('🚫 Access Denied!\n\nYou do not have permission to view this lorebook.\n\nCharacter: Marcus Blade\nRequired: Owner or explicit permission\nContact: creator_user or server administrator');
+        }
+
+        function showAccessGranted() {
+            alert('✅ Access Granted!\n\nYou have permission to view this lorebook.\n\nCharacter: Aria Starweaver\nPermission Level: Read\nGranted by: creator_user');
+        }
+
+        // Add interactive hover effects
+        document.querySelectorAll('.extension-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const toggle = this.querySelector('.extension-toggle');
+                if (toggle) {
+                    toggle.classList.toggle('enabled');
+                    const name = this.querySelector('.extension-item-name').textContent;
+                    const status = toggle.classList.contains('enabled') ? 'enabled' : 'disabled';
+                    console.log(`${name} is now ${status}`);
+                }
+            });
+        });
+
+        // Initialize with permission extension highlighted
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                const ourExtension = document.querySelector('.our-extension');
+                ourExtension.style.animation = 'pulse 2s ease-in-out';
+            }, 1000);
+        });
+
+        // Add pulse animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Demo dynamic server name functionality
+        let currentServerName = 'SillyTavern';
+        const serverNames = ['SillyTavern', 'ST--', 'MyTavern', 'RoleplayHub', 'AIServer'];
+        let nameIndex = 0;
+        
+        function updateServerNames() {
+            currentServerName = serverNames[nameIndex];
+            document.getElementById('extension-name-display').textContent = `${currentServerName} Lorebook Protection Symlink`;
+            document.getElementById('button-name-display').textContent = `${currentServerName} Lorebook Protection Symlink`;
+            
+            // Update modal title if it exists
+            const modalTitle = document.querySelector('.permission-header h3');
+            if (modalTitle) {
+                modalTitle.textContent = `🔐 ${currentServerName} Lorebook Protection Symlink`;
+            }
+            
+            nameIndex = (nameIndex + 1) % serverNames.length;
+        }
+        
+        // Auto-cycle through server names to demonstrate dynamic feature
+        setInterval(updateServerNames, 3000);
+    </script>
+</body>
+</html>
