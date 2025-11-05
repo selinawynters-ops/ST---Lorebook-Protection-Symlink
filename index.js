@@ -204,6 +204,7 @@ async function initUI() {
     // Initialize UI state
     updatePanelVisibility();
     updatePermissionList();
+    updateDynamicTitles();
 }
 
 /**
@@ -632,6 +633,23 @@ function resetSettings() {
         $(`#${extensionName}-security-level`).val('medium');
         
         showNotification('Settings reset to defaults', 'success');
+    }
+}
+
+/**
+ * Update dynamic titles with server name
+ */
+function updateDynamicTitles() {
+    // Update panel title
+    const panelTitle = document.getElementById('lorebook-panel-title');
+    if (panelTitle) {
+        panelTitle.textContent = `${serverName} Lorebook Admin`;
+    }
+    
+    // Update modal title
+    const modalTitle = document.getElementById('lorebook-modal-title');
+    if (modalTitle) {
+        modalTitle.textContent = `${serverName} Lorebook Admin`;
     }
 }
 

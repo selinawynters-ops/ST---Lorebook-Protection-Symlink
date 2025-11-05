@@ -319,7 +319,7 @@
                 <div class="header-content">
                     <h3>
                         <i class="fa-solid fa-shield-halved"></i>
-                        ST-- Lorebook Admin
+                        <span id="test-panel-title">ST-- Lorebook Admin</span>
                     </h3>
                     <button id="lorebook-close-panel" class="close-btn" title="Close Panel">
                         <i class="fa-solid fa-times"></i>
@@ -589,6 +589,9 @@
     <script>
         // Test the toggle functionality
         document.addEventListener('DOMContentLoaded', function() {
+            // Update dynamic titles for testing
+            document.getElementById('test-panel-title').textContent = 'ST-- Lorebook Admin';
+            
             const panel = document.getElementById('lorebook-protection-panel');
             const toggleBtn = document.getElementById('lorebook-toggle-panel');
             const closeBtn = document.getElementById('lorebook-close-panel');
