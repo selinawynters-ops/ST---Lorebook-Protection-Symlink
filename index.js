@@ -591,41 +591,241 @@ function getCharacterByNameOrId(nameOrId) {
 }
 
 function addPermissionManagementButton() {
-    // Add button to character settings panel
-    const settingsButton = $('<button id="lorebook-permissions-btn" class="menu_button">')
-        .text(`🔐 ${serverName} Lorebook Admin`)
-        .on('click', showPermissionManagementDialog);
+    console.log('[ST-- Lorebook Protection Symlink] Adding permission management button...');
     
-    $('#character-settings-panel').append(settingsButton);
+    // Create button with vanilla JavaScript
+    const settingsButton = document.createElement('button');
+    settingsButton.id = 'lorebook-permissions-btn';
+    settingsButton.className = 'menu_button lorebook-protection-symlink-button';
+    settingsButton.textContent = `🔐 ${serverName} Lorebook Admin`;
+    settingsButton.style.cssText = `
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        margin: 10px 0;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        display: inline-block;
+    `;
+    
+    settingsButton.addEventListener('click', showPermissionManagementDialog);
+    
+    settingsButton.addEventListener('mouseenter', () => {
+        settingsButton.style.transform = 'translateY(-2px)';
+        settingsButton.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+    });
+    
+    settingsButton.addEventListener('mouseleave', () => {
+        settingsButton.style.transform = 'translateY(0px)';
+        settingsButton.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+    });
+    
+    // Try multiple selectors to find the character settings panel
+    const possibleSelectors = [
+        '#character-settings-panel',
+        '.character-settings',
+        '[data-testid="character-settings"]',
+        '.settings-panel',
+        '.panel',
+        '.settings',
+        '#rm_char_settings',
+        '.character-settings-panel',
+        '.char-settings'
+    ];
+    
+    let buttonAdded = false;
+    
+    // Try to find and add button immediately
+    for (const selector of possibleSelectors) {
+        const panel = document.querySelector(selector);
+        if (panel) {
+            // Check if button already exists
+            if (!document.getElementById('lorebook-permissions-btn')) {
+                panel.appendChild(settingsButton);
+                console.log(`[ST-- Lorebook Protection Symlink] Button added to ${selector}`);
+                buttonAdded = true;
+                break;
+            }
+        }
+    }
+    
+    // If not added immediately, use observer to wait for elements
+    if (!buttonAdded) {
+        const observer = new MutationObserver((mutations, obs) => {
+            for (const selector of possibleSelectors) {
+                const panel = document.querySelector(selector);
+                if (panel && !document.getElementById('lorebook-permissions-btn')) {
+                    panel.appendChild(settingsButton);
+                    console.log(`[ST-- Lorebook Protection Symlink] Button added via observer to ${selector}`);
+                    obs.disconnect();
+                    buttonAdded = true;
+                    break;
+                }
+            }
+            
+            // Disconnect after 10 seconds if nothing found
+            setTimeout(() => {
+                if (!buttonAdded) {
+                    console.warn('[ST-- Lorebook Protection Symlink] Could not find character settings panel, adding button to body as fallback');
+                    document.body.appendChild(settingsButton);
+                    settingsButton.style.position = 'fixed';
+                    settingsButton.style.top = '10px';
+                    settingsButton.style.right = '10px';
+                    settingsButton.style.zIndex = '9999';
+                }
+                obs.disconnect();
+            }, 10000);
+        });
+        
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
 }
 
 function addAdminPanel() {
-    // Add admin panel to settings menu
-    const adminButton = $('<button id="lorebook-admin-btn" class="menu_button">')
-        .text(`⚙️ ${serverName} Protection Admin`)
-        .on('click', showAdminPanel);
+    console.log('[ST-- Lorebook Protection Symlink] Adding admin panel button...');
     
-    $('#settings-menu').append(adminButton);
+    // Create admin button with vanilla JavaScript
+    const adminButton = document.createElement('button');
+    adminButton.id = 'lorebook-admin-btn';
+    adminButton.className = 'menu_button lorebook-admin-button';
+    adminButton.textContent = `⚙️ ${serverName} Protection Admin`;
+    adminButton.style.cssText = `
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        margin: 10px 0;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        display: inline-block;
+    `;
+    
+    adminButton.addEventListener('click', showAdminPanel);
+    
+    // Try multiple selectors to find settings menu
+    const possibleSelectors = [
+        '#settings-menu',
+        '.settings-menu',
+        '#settings',
+        '.settings',
+        '#rm_settings_panel',
+        '.settings-panel',
+        '#settings-menu-list',
+        '.menu'
+    ];
+    
+    for (const selector of possibleSelectors) {
+        const menu = document.querySelector(selector);
+        if (menu) {
+            menu.appendChild(adminButton);
+            console.log(`[ST-- Lorebook Protection Symlink] Admin button added to ${selector}`);
+            return;
+        }
+    }
+    
+    console.warn('[ST-- Lorebook Protection Symlink] Could not find settings menu for admin button');
 }
 
 function addPermissionStatusIndicator() {
-    // Add status indicator to lorebook section
-    const statusDiv = $('<div id="permission-status" class="permission-status">')
-        .html('🔒 <span class="status-text">Secured</span>');
+    console.log('[ST-- Lorebook Protection Symlink] Adding permission status indicator...');
     
-    $('#right-nav-panel').prepend(statusDiv);
+    // Create status indicator with vanilla JavaScript
+    const statusDiv = document.createElement('div');
+    statusDiv.id = 'permission-status';
+    statusDiv.className = 'permission-status';
+    statusDiv.innerHTML = '🔒 <span class="status-text">Secured</span>';
+    statusDiv.style.cssText = `
+        background: #27ae60;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        margin: 5px 0;
+        display: inline-block;
+        font-weight: bold;
+    `;
+    
+    // Try multiple selectors to find right nav panel
+    const possibleSelectors = [
+        '#right-nav-panel',
+        '.right-nav-panel',
+        '#right-panel',
+        '.right-panel',
+        '#sidebar',
+        '.sidebar',
+        '.nav-panel'
+    ];
+    
+    for (const selector of possibleSelectors) {
+        const panel = document.querySelector(selector);
+        if (panel) {
+            panel.prepend(statusDiv);
+            console.log(`[ST-- Lorebook Protection Symlink] Status indicator added to ${selector}`);
+            return;
+        }
+    }
+    
+    console.warn('[ST-- Lorebook Protection Symlink] Could not find right nav panel for status indicator');
 }
 
 function hideLorebookContent() {
-    $('#world_info').hide();
-    $('.character-world-info').hide();
+    // Hide world info elements with vanilla JavaScript
+    const worldInfoElements = document.querySelectorAll('#world_info, .character-world-info');
+    worldInfoElements.forEach(element => {
+        element.style.display = 'none';
+    });
 }
 
 function showAccessDeniedMessage() {
-    const message = $('<div class="access-denied-message">')
-        .html('🚫 <strong>Access Denied</strong><br>You do not have permission to view this lorebook.');
+    console.log('[ST-- Lorebook Protection Symlink] Showing access denied message');
     
-    $('#world_info').parent().append(message);
+    // Create message with vanilla JavaScript
+    const message = document.createElement('div');
+    message.className = 'access-denied-message';
+    message.innerHTML = '🚫 <strong>Access Denied</strong><br>You do not have permission to view this lorebook.';
+    message.style.cssText = `
+        background: #e74c3c;
+        color: white;
+        padding: 15px;
+        border-radius: 6px;
+        margin: 10px 0;
+        text-align: center;
+        font-weight: bold;
+        border: 2px solid #c0392b;
+    `;
+    
+    // Try to find world info parent
+    const worldInfo = document.querySelector('#world_info, .character-world-info');
+    if (worldInfo && worldInfo.parentElement) {
+        worldInfo.parentElement.appendChild(message);
+    } else {
+        // Fallback: add to body
+        document.body.appendChild(message);
+        message.style.position = 'fixed';
+        message.style.top = '50%';
+        message.style.left = '50%';
+        message.style.transform = 'translate(-50%, -50%)';
+        message.style.zIndex = '10000';
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (message.parentElement) {
+                message.parentElement.removeChild(message);
+            }
+        }, 5000);
+    }
 }
 
 function showPermissionWarning() {
@@ -633,27 +833,127 @@ function showPermissionWarning() {
 }
 
 function showPermissionManagementDialog() {
-    // Show modal with permission management interface
-    const modal = $('<div class="permission-management-modal">')
-        .html(`
-            <h3>🔐 ${serverName} Lorebook Admin</h3>
-            <div class="permission-form">
-                <label>Character: <select id="permission-character-select"></select></label>
-                <label>User ID: <input type="text" id="permission-user-input"></label>
-                <button id="grant-permission-btn">Grant Access</button>
-                <button id="revoke-permission-btn">Revoke Access</button>
-            </div>
-            <div class="permission-list"></div>
-        `);
+    console.log('[ST-- Lorebook Protection Symlink] Showing permission management dialog');
     
-    $('body').append(modal);
+    // Create modal with vanilla JavaScript
+    const modal = document.createElement('div');
+    modal.className = 'permission-management-modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            max-width: 500px;
+            margin: 50px auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 10000;
+        ">
+            <h3 style="
+                color: #2c3e50;
+                margin-bottom: 20px;
+                font-size: 1.5em;
+            ">🔐 ${serverName} Lorebook Admin</h3>
+            <div class="permission-form" style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 10px; font-weight: bold;">
+                    Character: 
+                    <select id="permission-character-select" style="
+                        width: 100%;
+                        padding: 10px;
+                        border: 1px solid #ddd;
+                        border-radius: 6px;
+                        margin-top: 5px;
+                        font-size: 14px;
+                    "></select>
+                </label>
+                <label style="display: block; margin-bottom: 15px; font-weight: bold;">
+                    User ID: 
+                    <input type="text" id="permission-user-input" placeholder="Enter user ID..." style="
+                        width: 100%;
+                        padding: 10px;
+                        border: 1px solid #ddd;
+                        border-radius: 6px;
+                        margin-top: 5px;
+                        font-size: 14px;
+                    ">
+                </label>
+                <button id="grant-permission-btn" style="
+                    background: #27ae60;
+                    color: white;
+                    border: none;
+                    padding: 10px 20px;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    margin-right: 10px;
+                    font-size: 14px;
+                ">Grant Access</button>
+                <button id="revoke-permission-btn" style="
+                    background: #e74c3c;
+                    color: white;
+                    border: none;
+                    padding: 10px 20px;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    margin-right: 10px;
+                    font-size: 14px;
+                ">Revoke Access</button>
+                <button id="close-modal-btn" style="
+                    background: #95a5a6;
+                    color: white;
+                    border: none;
+                    padding: 10px 20px;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 14px;
+                ">Close</button>
+            </div>
+            <div class="permission-list" id="current-permissions" style="
+                background: #f8f9fa;
+                padding: 15px;
+                border-radius: 6px;
+                min-height: 100px;
+                font-size: 14px;
+                border: 1px solid #dee2e6;
+            ">
+                <h4 style="margin: 0 0 10px 0; color: #2c3e50;">Current Permissions</h4>
+                <div id="permissions-content">Loading...</div>
+            </div>
+        </div>
+    `;
+    
+    // Add backdrop
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Event handlers
+    document.getElementById('grant-permission-btn').addEventListener('click', grantPermissionFromDialog);
+    document.getElementById('revoke-permission-btn').addEventListener('click', revokePermissionFromDialog);
+    document.getElementById('close-modal-btn').addEventListener('click', function() {
+        document.body.removeChild(modal);
+    });
+    
+    // Close on backdrop click
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            document.body.removeChild(modal);
+        }
+    });
     
     // Populate character select
     populateCharacterSelect();
-    
-    // Bind events
-    $('#grant-permission-btn').on('click', grantPermissionFromDialog);
-    $('#revoke-permission-btn').on('click', revokePermissionFromDialog);
+    updatePermissionList();
 }
 
 function showAdminPanel() {
@@ -662,31 +962,119 @@ function showAdminPanel() {
 }
 
 function populateCharacterSelect() {
-    const context = SillyTavern.getContext();
-    const select = $('#permission-character-select');
+    console.log('[ST-- Lorebook Protection Symlink] Populating character select...');
     
-    context.characters?.forEach(character => {
-        const option = $('<option>')
-            .val(character.data?.extensions?.character_id || character.name)
-            .text(character.name);
-        select.append(option);
-    });
+    try {
+        const context = SillyTavern.getContext();
+        const select = document.getElementById('permission-character-select');
+        
+        if (!select) {
+            console.error('[ST-- Lorebook Protection Symlink] Character select not found');
+            return;
+        }
+        
+        // Clear existing options except the first one
+        while (select.children.length > 1) {
+            select.removeChild(select.lastChild);
+        }
+        
+        // Add character options
+        if (context && context.characters) {
+            context.characters.forEach(character => {
+                const option = document.createElement('option');
+                option.value = character.data?.extensions?.character_id || character.name || '';
+                option.textContent = character.name || 'Unknown Character';
+                select.appendChild(option);
+            });
+            console.log(`[ST-- Lorebook Protection Symlink] Added ${context.characters.length} characters to select`);
+        } else {
+            console.warn('[ST-- Lorebook Protection Symlink] No characters found in context');
+        }
+    } catch (error) {
+        console.error('[ST-- Lorebook Protection Symlink] Error populating character select:', error);
+    }
 }
 
 function grantPermissionFromDialog() {
-    const characterId = $('#permission-character-select').val();
-    const userId = $('#permission-user-input').val();
+    console.log('[ST-- Lorebook Protection Symlink] Granting permission from dialog...');
     
-    const result = grantPermission(userId, characterId);
-    toastr.info(result);
+    const characterSelect = document.getElementById('permission-character-select');
+    const userInput = document.getElementById('permission-user-input');
+    
+    const characterId = characterSelect ? characterSelect.value : '';
+    const userId = userInput ? userInput.value : '';
+    
+    if (characterId && userId) {
+        const result = grantPermission(userId, characterId);
+        updatePermissionList();
+        
+        // Clear user input
+        if (userInput) {
+            userInput.value = '';
+        }
+        
+        // Show result (simple alert for now, since toastr may not be available)
+        if (typeof result === 'string') {
+            alert(result);
+        }
+    } else {
+        alert('Please select a character and enter a user ID');
+    }
 }
 
 function revokePermissionFromDialog() {
-    const characterId = $('#permission-character-select').val();
-    const userId = $('#permission-user-input').val();
+    console.log('[ST-- Lorebook Protection Symlink] Revoking permission from dialog...');
     
-    const result = revokePermission(userId, characterId);
-    toastr.info(result);
+    const characterSelect = document.getElementById('permission-character-select');
+    const userInput = document.getElementById('permission-user-input');
+    
+    const characterId = characterSelect ? characterSelect.value : '';
+    const userId = userInput ? userInput.value : '';
+    
+    if (characterId && userId) {
+        const result = revokePermission(userId, characterId);
+        updatePermissionList();
+        
+        // Show result (simple alert for now, since toastr may not be available)
+        if (typeof result === 'string') {
+            alert(result);
+        }
+    } else {
+        alert('Please select a character and enter a user ID');
+    }
+}
+
+function updatePermissionList() {
+    console.log('[ST-- Lorebook Protection Symlink] Updating permission list...');
+    
+    try {
+        const permissionsDiv = document.getElementById('permissions-content');
+        if (!permissionsDiv) {
+            console.warn('[ST-- Lorebook Protection Symlink] Permissions content div not found');
+            return;
+        }
+        
+        const permissionData = loadPermissionData();
+        let html = '';
+        
+        if (permissionData && Object.keys(permissionData).length > 0) {
+            for (const [characterId, permissions] of Object.entries(permissionData)) {
+                html += `
+                    <div style="margin-bottom: 10px; padding: 10px; background: white; border-radius: 4px;">
+                        <strong>${characterId}</strong><br>
+                        <small>Owner: ${permissions.owner || 'Unknown'}</small><br>
+                        <small>Allowed: ${permissions.allowedUsers?.join(', ') || 'None'}</small>
+                    </div>
+                `;
+            }
+        } else {
+            html = '<div style="color: #666; font-style: italic;">No permissions set yet.</div>';
+        }
+        
+        permissionsDiv.innerHTML = html;
+    } catch (error) {
+        console.error('[ST-- Lorebook Protection Symlink] Error updating permission list:', error);
+    }
 }
 
 async function loadPermissionData() {
@@ -767,7 +1155,10 @@ function checkCharacterPermissions(characterId) {
     const hasAccess = verifyLorebookAccess({ characterId, userId: currentUserId });
     
     const statusText = hasAccess ? '✅ Accessible' : '🔒 Restricted';
-    $('#permission-status .status-text').text(statusText);
+    const statusTextElement = document.querySelector('#permission-status .status-text');
+    if (statusTextElement) {
+        statusTextElement.textContent = statusText;
+    }
     
     if (extensionSettings.showPermissionWarnings && !hasAccess) {
         showPermissionWarning();
@@ -792,7 +1183,7 @@ function resetPermissionState() {
 }
 
 // Initialize extension when SillyTavern is ready
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
     // Wait for SillyTavern to be fully loaded
     const { eventSource, event_types } = SillyTavern.getContext();
     
