@@ -184,6 +184,17 @@ function registerSlashCommands(context) {
  * Add UI elements to SillyTavern
  */
 function addUIElements(context) {
+    console.log('[ST-- Lorebook Protection Symlink] Adding UI elements...');
+    
+    // Add main toolbar icon (primary interface integration)
+    addMainToolbarIcon();
+    
+    // Add floating icon (always visible)
+    addFloatingIcon();
+    
+    // Add sidebar icon for better integration
+    addSidebarIcon();
+    
     // Add permission management button to character settings
     addPermissionManagementButton();
     
@@ -588,6 +599,367 @@ function getCharacterByNameOrId(nameOrId) {
         c.data?.extensions?.character_id === nameOrId ||
         String(c.data?.extensions?.character_id) === String(nameOrId)
     );
+}
+
+function addMainToolbarIcon() {
+    console.log('[ST-- Lorebook Protection Symlink] Adding main toolbar icon...');
+    
+    // Create main toolbar icon with vanilla JavaScript
+    const toolbarIcon = document.createElement('div');
+    toolbarIcon.id = 'lorebook-protection-toolbar-icon';
+    toolbarIcon.className = 'toolbar-icon fa-solid fa-shield-halved';
+    toolbarIcon.title = `${serverName} Lorebook Admin`;
+    toolbarIcon.innerHTML = '🔐';
+    toolbarIcon.style.cssText = `
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        margin: 0 4px;
+        cursor: pointer;
+        border-radius: 4px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        font-size: 16px;
+        transition: all 0.2s ease;
+        position: relative;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border: 1px solid rgba(255,255,255,0.2);
+    `;
+    
+    toolbarIcon.addEventListener('click', showPermissionManagementDialog);
+    
+    toolbarIcon.addEventListener('mouseenter', () => {
+        toolbarIcon.style.transform = 'translateY(-2px)';
+        toolbarIcon.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+    });
+    
+    toolbarIcon.addEventListener('mouseleave', () => {
+        toolbarIcon.style.transform = 'translateY(0)';
+        toolbarIcon.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+    });
+    
+    // Try to find main toolbar to add icon
+    const possibleSelectors = [
+        '#extensionsMenu',
+        '.extensions-menu',
+        '#extensions-menu',
+        '.extensions-menu-area',
+        '#main-menu',
+        '.main-menu',
+        '#top-menu',
+        '.top-menu',
+        '#toolbar',
+        '.toolbar',
+        '#main-toolbar',
+        '.main-toolbar',
+        '#header-buttons',
+        '.header-buttons',
+        '#top-bar-right',
+        '.top-bar-right',
+        '#menuBar',
+        '.menuBar',
+        '#menu-bar',
+        '.menu-bar'
+    ];
+    
+    let iconAdded = false;
+    
+    // Try to find and add icon immediately
+    for (const selector of possibleSelectors) {
+        const toolbar = document.querySelector(selector);
+        if (toolbar) {
+            // Check if icon already exists
+            if (!document.getElementById('lorebook-protection-toolbar-icon')) {
+                // Add as last child to appear at the end
+                toolbar.appendChild(toolbarIcon);
+                console.log(`[ST-- Lorebook Protection Symlink] Main toolbar icon added to ${selector}`);
+                iconAdded = true;
+                break;
+            }
+        }
+    }
+    
+    // If not added immediately, use observer to wait for elements
+    if (!iconAdded) {
+        const observer = new MutationObserver((mutations, obs) => {
+            for (const selector of possibleSelectors) {
+                const toolbar = document.querySelector(selector);
+                if (toolbar && !document.getElementById('lorebook-protection-toolbar-icon')) {
+                    toolbar.appendChild(toolbarIcon);
+                    console.log(`[ST-- Lorebook Protection Symlink] Main toolbar icon added via observer to ${selector}`);
+                    obs.disconnect();
+                    iconAdded = true;
+                    break;
+                }
+            }
+            
+            // Disconnect after 10 seconds if nothing found
+            setTimeout(() => {
+                if (!iconAdded) {
+                    console.warn('[ST-- Lorebook Protection Symlink] Could not find main toolbar, trying alternative locations...');
+                    addAlternativeToolbarIcon();
+                }
+                obs.disconnect();
+            }, 10000);
+        });
+        
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
+}
+
+function addAlternativeToolbarIcon() {
+    console.log('[ST-- Lorebook Protection Symlink] Adding alternative toolbar icon...');
+    
+    // Try alternative locations in the header area
+    const alternativeSelectors = [
+        '#header',
+        '.header',
+        'header',
+        '#top-header',
+        '.top-header',
+        '#main-header',
+        '.main-header',
+        '#app-header',
+        '.app-header'
+    ];
+    
+    const toolbarIcon = document.createElement('div');
+    toolbarIcon.id = 'lorebook-protection-toolbar-icon';
+    toolbarIcon.className = 'toolbar-icon';
+    toolbarIcon.title = `${serverName} Lorebook Admin`;
+    toolbarIcon.innerHTML = '🔐';
+    toolbarIcon.style.cssText = `
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        margin: 0 8px;
+        cursor: pointer;
+        border-radius: 4px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        font-size: 16px;
+        transition: all 0.2s ease;
+        position: relative;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border: 1px solid rgba(255,255,255,0.2);
+        z-index: 1000;
+    `;
+    
+    toolbarIcon.addEventListener('click', showPermissionManagementDialog);
+    
+    toolbarIcon.addEventListener('mouseenter', () => {
+        toolbarIcon.style.transform = 'translateY(-2px)';
+        toolbarIcon.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+    });
+    
+    toolbarIcon.addEventListener('mouseleave', () => {
+        toolbarIcon.style.transform = 'translateY(0)';
+        toolbarIcon.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+    });
+    
+    for (const selector of alternativeSelectors) {
+        const header = document.querySelector(selector);
+        if (header && !document.getElementById('lorebook-protection-toolbar-icon')) {
+            // Position in top-right of header
+            toolbarIcon.style.position = 'absolute';
+            toolbarIcon.style.top = '10px';
+            toolbarIcon.style.right = '10px';
+            header.appendChild(toolbarIcon);
+            console.log(`[ST-- Lorebook Protection Symlink] Alternative toolbar icon added to ${selector}`);
+            return;
+        }
+    }
+    
+    // Last resort: add to body as fixed positioned icon
+    toolbarIcon.style.position = 'fixed';
+    toolbarIcon.style.top = '10px';
+    toolbarIcon.style.left = '50%';
+    toolbarIcon.style.transform = 'translateX(-50%)';
+    document.body.appendChild(toolbarIcon);
+    console.log('[ST-- Lorebook Protection Symlink] Toolbar icon added to body as fallback');
+}
+
+function addFloatingIcon() {
+    console.log('[ST-- Lorebook Protection Symlink] Adding floating icon...');
+    
+    // Create floating icon with vanilla JavaScript
+    const floatingIcon = document.createElement('div');
+    floatingIcon.id = 'lorebook-protection-floating-icon';
+    floatingIcon.className = 'lorebook-protection-floating-icon';
+    floatingIcon.innerHTML = '🔐';
+    floatingIcon.title = `${serverName} Lorebook Admin`;
+    floatingIcon.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        cursor: pointer;
+        z-index: 9999;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        transition: all 0.3s ease;
+        border: 2px solid rgba(255,255,255,0.2);
+    `;
+    
+    floatingIcon.addEventListener('click', showPermissionManagementDialog);
+    
+    floatingIcon.addEventListener('mouseenter', () => {
+        floatingIcon.style.transform = 'scale(1.1)';
+        floatingIcon.style.boxShadow = '0 6px 16px rgba(0,0,0,0.4)';
+    });
+    
+    floatingIcon.addEventListener('mouseleave', () => {
+        floatingIcon.style.transform = 'scale(1)';
+        floatingIcon.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+    });
+    
+    // Add to body immediately
+    document.body.appendChild(floatingIcon);
+    console.log('[ST-- Lorebook Protection Symlink] Floating icon added to page');
+    
+    // Create tooltip that appears on hover
+    const tooltip = document.createElement('div');
+    tooltip.id = 'lorebook-protection-tooltip';
+    tooltip.textContent = `${serverName} Lorebook Admin`;
+    tooltip.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 80px;
+        background: #2c3e50;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 500;
+        z-index: 10000;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+        white-space: nowrap;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    `;
+    
+    document.body.appendChild(tooltip);
+    
+    // Show/hide tooltip on hover
+    floatingIcon.addEventListener('mouseenter', () => {
+        tooltip.style.opacity = '1';
+    });
+    
+    floatingIcon.addEventListener('mouseleave', () => {
+        tooltip.style.opacity = '0';
+    });
+}
+
+function addSidebarIcon() {
+    console.log('[ST-- Lorebook Protection Symlink] Adding sidebar icon...');
+    
+    // Create sidebar icon with vanilla JavaScript
+    const sidebarIcon = document.createElement('div');
+    sidebarIcon.id = 'lorebook-protection-sidebar-icon';
+    sidebarIcon.className = 'lorebook-protection-sidebar-icon';
+    sidebarIcon.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px;">
+            <span style="font-size: 18px;">🔐</span>
+            <span style="font-size: 12px; font-weight: 500;">Lorebook Admin</span>
+        </div>
+    `;
+    sidebarIcon.title = `${serverName} Lorebook Admin`;
+    sidebarIcon.style.cssText = `
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-radius: 6px;
+        margin: 5px 10px;
+        position: relative;
+        overflow: hidden;
+    `;
+    
+    sidebarIcon.addEventListener('click', showPermissionManagementDialog);
+    
+    sidebarIcon.addEventListener('mouseenter', () => {
+        sidebarIcon.style.transform = 'translateX(-5px)';
+        sidebarIcon.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+    });
+    
+    sidebarIcon.addEventListener('mouseleave', () => {
+        sidebarIcon.style.transform = 'translateX(0)';
+        sidebarIcon.style.boxShadow = 'none';
+    });
+    
+    // Try to find sidebar to add icon
+    const possibleSelectors = [
+        '#right-nav-panel',
+        '.right-nav-panel', 
+        '#right-panel',
+        '.right-panel',
+        '#sidebar',
+        '.sidebar',
+        '.nav-panel',
+        '#character-nav',
+        '.character-nav',
+        '#main-nav',
+        '.main-nav'
+    ];
+    
+    let iconAdded = false;
+    
+    // Try to find and add icon immediately
+    for (const selector of possibleSelectors) {
+        const panel = document.querySelector(selector);
+        if (panel) {
+            // Check if icon already exists
+            if (!document.getElementById('lorebook-protection-sidebar-icon')) {
+                panel.appendChild(sidebarIcon);
+                console.log(`[ST-- Lorebook Protection Symlink] Sidebar icon added to ${selector}`);
+                iconAdded = true;
+                break;
+            }
+        }
+    }
+    
+    // If not added immediately, use observer to wait for elements
+    if (!iconAdded) {
+        const observer = new MutationObserver((mutations, obs) => {
+            for (const selector of possibleSelectors) {
+                const panel = document.querySelector(selector);
+                if (panel && !document.getElementById('lorebook-protection-sidebar-icon')) {
+                    panel.appendChild(sidebarIcon);
+                    console.log(`[ST-- Lorebook Protection Symlink] Sidebar icon added via observer to ${selector}`);
+                    obs.disconnect();
+                    iconAdded = true;
+                    break;
+                }
+            }
+            
+            // Disconnect after 10 seconds if nothing found
+            setTimeout(() => {
+                if (!iconAdded) {
+                    console.warn('[ST-- Lorebook Protection Symlink] Could not find sidebar for icon, using floating icon only');
+                }
+                obs.disconnect();
+            }, 10000);
+        });
+        
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
 }
 
 function addPermissionManagementButton() {
