@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔐 SillyTavern Lorebook Protection - Test Interface</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --SmartThemeBodyColor: #ffffff;
+            --SmartThemeChatTintColor: #f8f9fa;
+            --SmartThemeBorderColor: #dee2e6;
+            --SmartThemeTextColor: #212529;
+            --SmartThemeEmColor: #667eea;
+            --SmartThemeQuoteColor: #6c757d;
+            --mainFontFamily: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            font-family: var(--mainFontFamily);
+            background: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .sillytavern-header {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .main-menu {
+            display: flex;
+            gap: 10px;
+        }
+
+        .menu-item {
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .menu-item:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .extension-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .extension-icon:hover {
+            transform: translateY(-2px);
+            background: rgba(255,255,255,0.2);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .main-content {
+            background: white;
+            margin: 20px;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .test-section {
+            background: #e3f2fd;
+            border: 2px solid #1976d2;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .success-message {
+            background: #d4edda;
+            border: 2px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .feature-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 20px;
+        }
+
+        .feature-card h3 {
+            color: #495057;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .feature-card ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .feature-card li {
+            margin: 5px 0;
+        }
+
+        .installation-steps {
+            background: #fff3cd;
+            border: 2px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .installation-steps h3 {
+            color: #d68910;
+            margin-top: 0;
+        }
+
+        .installation-steps ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .installation-steps li {
+            margin: 8px 0;
+        }
+
+        /* SillyTavern Extension Settings Simulation */
+        .extensions-settings {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .inline-drawer {
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .inline-drawer-header {
+            background: #e9ecef;
+            padding: 12px 15px;
+            border-radius: 6px 6px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .inline-drawer-content {
+            padding: 15px;
+        }
+
+        .checkbox_label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .notes {
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 10px;
+        }
+
+        .menu_button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s ease;
+        }
+
+        .menu_button:hover {
+            background: #5a6fd8;
+        }
+
+        /* Extension Panel (visible for testing) */
+        .test-panel-notice {
+            background: #d1ecf1;
+            border: 2px solid #bee5eb;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .arrow-indicator {
+            position: absolute;
+            background: #4caf50;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 100;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .arrow-1 {
+            top: 100px;
+            right: 380px;
+        }
+    </style>
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body>
+    <!-- SillyTavern Header Simulation -->
+    <div class="sillytavern-header">
+        <div class="header-left">
+            <div class="logo">📚 SillyTavern</div>
+            <div class="main-menu">
+                <div class="menu-item">Characters</div>
+                <div class="menu-item">Chats</div>
+                <div class="menu-item">Lorebooks</div>
+                <div class="menu-item">Settings</div>
+                <div class="menu-item">Extensions</div>
+            </div>
+        </div>
+        
+        <div class="header-right">
+            <div class="extension-icon" title="Extension 1">🔧</div>
+            <div class="extension-icon" title="Extension 2">🎨</div>
+            <div class="extension-icon" title="Extension 3">📊</div>
+            <div class="extension-icon" title="Extension 4">🎵</div>
+            <div class="extension-icon" title="Extension 5">🌟</div>
+        </div>
+        
+        <!-- Arrow pointing to where panel will appear -->
+        <div class="arrow-indicator arrow-1">👈 Extension Panel Here</div>
+    </div>
+
+    <!-- Extension Panel (Visible for testing) -->
+    <div id="lorebook-protection-panel" class="lorebook-protection-panel" style="position: relative; top: auto; right: auto; margin: 20px; transform: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+        <!-- Collapse/Expand Toggle Button -->
+        <button class="lorebook-toggle-btn" id="lorebook-toggle-panel" title="Toggle Lorebook Protection Panel">
+            <i class="fa-solid fa-chevron-right"></i>
+            <span class="toggle-icon">🔐</span>
+        </button>
+
+        <!-- Main Panel Content -->
+        <div class="lorebook-panel-container">
+            <!-- Panel Header -->
+            <div class="lorebook-panel-header">
+                <div class="header-content">
+                    <h3>
+                        <i class="fa-solid fa-shield-halved"></i>
+                        ST-- Lorebook Admin
+                    </h3>
+                    <button id="lorebook-close-panel" class="close-btn" title="Close Panel">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Panel Body -->
+            <div class="lorebook-panel-body">
+                <!-- Quick Actions -->
+                <div class="lorebook-section">
+                    <h4>Quick Actions</h4>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary">
+                            <i class="fa-solid fa-sync"></i> Refresh List
+                        </button>
+                        <button class="btn btn-secondary">
+                            <i class="fa-solid fa-download"></i> Export Data
+                        </button>
+                        <button class="btn btn-secondary">
+                            <i class="fa-solid fa-upload"></i> Import Data
+                        </button>
+                        <button class="btn btn-danger">
+                            <i class="fa-solid fa-trash"></i> Reset All
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Permission Management -->
+                <div class="lorebook-section">
+                    <h4>Permission Management</h4>
+                    <div class="permission-form">
+                        <div class="form-row">
+                            <label for="lorebook-character-select">Character:</label>
+                            <select id="lorebook-character-select">
+                                <option value="">Select character...</option>
+                                <option value="character1">Sample Character 1</option>
+                                <option value="character2">Sample Character 2</option>
+                                <option value="character3">Sample Character 3</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label for="lorebook-user-input">User ID:</label>
+                            <input type="text" id="lorebook-user-input" placeholder="Enter user ID...">
+                        </div>
+                        <div class="form-row">
+                            <button class="btn btn-success">
+                                <i class="fa-solid fa-plus"></i> Grant Access
+                            </button>
+                            <button class="btn btn-warning">
+                                <i class="fa-solid fa-minus"></i> Revoke Access
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Character List -->
+                <div class="lorebook-section">
+                    <div class="section-header">
+                        <h4>Character Permissions</h4>
+                        <div class="filter-controls">
+                            <input type="text" placeholder="Search characters..." class="search-input">
+                            <select class="filter-select">
+                                <option value="all">All Characters</option>
+                                <option value="has-permissions">Has Permissions</option>
+                                <option value="no-permissions">No Permissions</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="character-list">
+                        <div class="lorebook-character-item">
+                            <div class="character-header">
+                                <h4>Sample Character 1</h4>
+                                <span class="character-id">character1</span>
+                            </div>
+                            <div class="permission-info">
+                                <div class="permission-field">
+                                    <label>Owner:</label>
+                                    <span>user123</span>
+                                </div>
+                                <div class="permission-field">
+                                    <label>Allowed Users:</label>
+                                    <div class="user-list">
+                                        <span class="user-tag">user456</span>
+                                        <span class="user-tag">user789</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="lorebook-character-item">
+                            <div class="character-header">
+                                <h4>Sample Character 2</h4>
+                                <span class="character-id">character2</span>
+                            </div>
+                            <div class="permission-info">
+                                <div class="permission-field">
+                                    <label>Owner:</label>
+                                    <span>user123</span>
+                                </div>
+                                <div class="permission-field">
+                                    <label>Allowed Users:</label>
+                                    <div class="user-list">
+                                        <span class="no-users">No users granted</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Access Logs -->
+                <div class="lorebook-section">
+                    <div class="section-header">
+                        <h4>Access Logs</h4>
+                        <button class="btn btn-small btn-danger">
+                            <i class="fa-solid fa-trash"></i> Clear Logs
+                        </button>
+                    </div>
+                    <div class="logs-container">
+                        <div class="log-entry log-access">
+                            <div class="log-time">2024-01-15 14:30:25</div>
+                            <div class="log-character">character1</div>
+                            <div class="log-action">Access granted to user456</div>
+                        </div>
+                        <div class="log-entry log-admin">
+                            <div class="log-time">2024-01-15 14:28:10</div>
+                            <div class="log-character">character1</div>
+                            <div class="log-action">Permission modified by admin</div>
+                        </div>
+                        <div class="log-entry log-denied">
+                            <div class="log-time">2024-01-15 14:25:33</div>
+                            <div class="log-character">character2</div>
+                            <div class="log-action">Access denied for user999</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="test-panel-notice">
+            🧪 TEST MODE: Extension panel is visible above. In SillyTavern, it will be a toggle panel on the right side.
+        </div>
+
+        <div class="success-message">
+            ✅ COMPLETE: SillyTavern Lorebook Protection Extension based on RPG Companion architecture
+        </div>
+
+        <div class="test-section">
+            <h2>🎯 Extension Architecture</h2>
+            <p>Based on the RPG Companion extension, this follows SillyTavern's proper extension structure:</p>
+            
+            <ul>
+                <li>✅ Proper manifest.json with SillyTavern extension format</li>
+                <li>✅ Template-based UI system using renderExtensionTemplateAsync</li>
+                <li>✅ Toggle panel system (not floating icons)</li>
+                <li>✅ Extension settings in Extensions tab</li>
+                <li>✅ Event source integration for SillyTavern events</li>
+                <li>✅ localStorage persistence</li>
+                <li>✅ Responsive and themed design</li>
+                <li>✅ Admin interface functionality preserved</li>
+            </ul>
+        </div>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h3><i class="fa-solid fa-shield-halved"></i> Core Features</h3>
+                <ul>
+                    <li>Permission management system</li>
+                    <li>Character-based access control</li>
+                    <li>User authentication</li>
+                    <li>Access logging and monitoring</li>
+                    <li>Security level configuration</li>
+                    <li>Dynamic server name detection</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h3><i class="fa-solid fa-users-cog"></i> Admin Interface</h3>
+                <ul>
+                    <li>Character permission dashboard</li>
+                    <li>Grant/revoke user access</li>
+                    <li>Access log viewer</li>
+                    <li>Permission search & filtering</li>
+                    <li>Export/import permission data</li>
+                    <li>Bulk permission management</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h3><i class="fa-solid fa-cog"></i> Integration</h3>
+                <ul>
+                    <li>SillyTavern Extensions tab</li>
+                    <li>Toggle panel on right side</li>
+                    <li>Character change event handling</li>
+                    <li>Chat loaded event integration</li>
+                    <li>Theme compatibility</li>
+                    <li>Mobile responsive design</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="extensions-settings">
+            <h3>⚙️ Extension Settings (Simulated)</h3>
+            <div class="inline-drawer">
+                <div class="inline-drawer-header">
+                    <b><i class="fa-solid fa-shield-halved"></i> ST-- Lorebook Protection</b>
+                    <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
+                </div>
+                <div class="inline-drawer-content">
+                    <label class="checkbox_label">
+                        <input type="checkbox" checked />
+                        <span>Enable Lorebook Protection</span>
+                    </label>
+                    <small class="notes">Toggle to enable/disable the lorebook protection system. Configure additional settings within the panel itself.</small>
+
+                    <div style="margin-top: 10px;">
+                        <label class="checkbox_label">
+                            <select style="margin-left: 10px;">
+                                <option value="low">Low - Basic protection</option>
+                                <option value="medium" selected>Medium - Standard protection</option>
+                                <option value="high">High - Maximum security</option>
+                            </select>
+                            <span style="margin-left: 10px;">Security Level</span>
+                        </label>
+                    </div>
+
+                    <div style="margin-top: 10px; display: flex; gap: 10px;">
+                        <button class="menu_button">
+                            <i class="fa-solid fa-shield-halved"></i> Open Admin Panel
+                        </button>
+                        <button class="menu_button">
+                            <i class="fa-solid fa-download"></i> Export Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="installation-steps">
+            <h3>📦 Installation Instructions</h3>
+            <ol>
+                <li><strong>Download:</strong> Get <code>sillytavern-lorebook-protection-final.zip</code></li>
+                <li><strong>Install:</strong> Open SillyTavern → Settings → Extensions → "Install Extension"</li>
+                <li><strong>Upload:</strong> Select and upload the ZIP file</li>
+                <li><strong>Enable:</strong> Check "Enable Lorebook Protection" in the Extensions tab</li>
+                <li><strong>Access:</strong> Look for the 🔐 toggle panel on the right side of SillyTavern</li>
+                <li><strong>Configure:</strong> Set security level and manage permissions through the panel</li>
+            </ol>
+            
+            <p><strong>Key Improvements over previous versions:</strong></p>
+            <ul>
+                <li>✅ Proper SillyTavern extension architecture</li>
+                <li>✅ Toggle panel instead of floating icons</li>
+                <li>✅ Extension settings integration</li>
+                <li>✅ Event-driven system</li>
+                <li>✅ Template-based UI</li>
+                <li>✅ Full admin interface functionality</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Load extension styles for testing -->
+    <link rel="stylesheet" href="sillytavern-lorebook-protection/style.css">
+    
+    <script>
+        // Test the toggle functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const panel = document.getElementById('lorebook-protection-panel');
+            const toggleBtn = document.getElementById('lorebook-toggle-panel');
+            const closeBtn = document.getElementById('lorebook-close-panel');
+            let isExpanded = false;
+
+            toggleBtn.addEventListener('click', function() {
+                isExpanded = !isExpanded;
+                if (isExpanded) {
+                    panel.style.transform = 'translateX(0)';
+                    toggleBtn.querySelector('i').className = 'fa-solid fa-chevron-down';
+                    toggleBtn.title = 'Collapse Lorebook Protection Panel';
+                } else {
+                    panel.style.transform = 'translateX(320px)';
+                    toggleBtn.querySelector('i').className = 'fa-solid fa-chevron-right';
+                    toggleBtn.title = 'Expand Lorebook Protection Panel';
+                }
+            });
+
+            closeBtn.addEventListener('click', function() {
+                panel.style.transform = 'translateX(320px)';
+                toggleBtn.querySelector('i').className = 'fa-solid fa-chevron-right';
+                isExpanded = false;
+            });
+
+            // Test buttons
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const text = this.textContent.trim();
+                    console.log('Button clicked:', text);
+                    alert(`${text} - This would work in the actual SillyTavern extension!`);
+                });
+            });
+
+            console.log('🧪 SillyTavern Lorebook Protection Extension Test Loaded');
+            console.log('📍 The toggle panel is visible above for testing');
+            console.log('🎯 In SillyTavern, this will be a collapsible panel on the right side');
+        });
+    </script>
+</body>
+</html>

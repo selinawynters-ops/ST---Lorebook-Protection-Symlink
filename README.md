@@ -1,308 +1,204 @@
-# SillyTavern Lorebook Protection Symlink Extension
+# 🔐 ST-- Lorebook Protection Symlink
 
-🔐 **A dynamic SillyTavern extension that provides secure symlink-based protection for character lorebooks, automatically adapting to your server's directory name (e.g., "ST-- Lorebook Protection Symlink").**
+A comprehensive SillyTavern extension for secure lorebook permission management using symlink-based access control.
 
-## ⚡ Quick Installation (Via SillyTavern)
+## 📋 Overview
 
-### Method 1: Install Extension Function (Recommended)
+This extension provides enterprise-grade security for SillyTavern character lorebooks, restricting access to only character creators/owners and server administrators. Built using proper SillyTavern extension architecture based on the RPG Companion extension framework.
 
-1. **Download the extension ZIP**: `sillytavern-lorebook-admin-extension.zip`
-2. **Open SillyTavern** in your browser
-3. **Go to Settings** → **Extensions** → **Install Extension**
-4. **Upload the ZIP file** and click "Install"
-5. **Enable the extension** in the extensions list
-6. **Restart SillyTavern** to activate all features
+## ✨ Key Features
 
-### Method 2: Manual Installation
+### 🔒 Security System
+- **Symlink-based protection** for filesystem-level access control
+- **Creator/owner control** - Only character creators can manage their lorebooks
+- **Administrator override** - Server admins have full access control
+- **Real-time permission validation** with instant checking
+- **Multi-layer security** - Network, Application, and Filesystem protection
+- **Access logging** - Complete audit trail of all access attempts
 
-1. **Extract the ZIP** to your SillyTavern `extensions` directory:
-   ```bash
-   # Extract to extensions folder
-   unzip sillytavern-lorebook-admin-extension.zip -d public/scripts/extensions/third-party/lorebook-admin/
-   ```
-2. **Restart SillyTavern** to load the extension
+### 🎛️ Admin Interface
+- **Toggle panel system** - Collapsible right-side panel (not floating icons)
+- **Permission management** - Grant/revoke access per character
+- **Character dashboard** - View all characters and permission status
+- **Access logs** - Detailed monitoring and history
+- **Search & filtering** - Find characters and permission states
+- **Export/Import** - Backup and restore permission data
 
-## 🎯 Dynamic Server Name Feature
+### 🎨 User Experience
+- **Dynamic server naming** - Adapts to your SillyTavern installation
+- **Mobile responsive** - Works on all screen sizes
+- **Theme integration** - Matches SillyTavern's visual design
+- **Smooth animations** - Professional micro-interactions
+- **Toast notifications** - User-friendly feedback system
 
-### Automatic Server Name Detection
+## 📦 Installation
 
-The extension automatically detects and adapts to your SillyTavern server's custom name:
+### Prerequisites
+- SillyTavern latest version
+- Server administrator access (for full functionality)
 
-#### **For "ST--" Directory:**
-- Extension shows as: **"ST-- Lorebook Protection Symlink"**
-- Button displays: **"🔐 ST-- Lorebook Protection Symlink"**
-- Console logs: **"[ST-- Lorebook Protection Symlink] ..."**
+### Installation Steps
+1. **Download** the latest release: `sillytavern-lorebook-protection-final.zip`
+2. **Install** in SillyTavern:
+   - Open SillyTavern → Settings → Extensions
+   - Click "Install Extension"
+   - Upload the ZIP file
+3. **Enable** the extension:
+   - Check "Enable Lorebook Protection" in the Extensions tab
+4. **Configure** security settings:
+   - Set security level (Low/Medium/High)
+   - Configure notifications
+5. **Access** the admin panel:
+   - Look for the 🔐 toggle panel on the right side
+   - Or use the "Open Admin Panel" button in Extensions settings
 
-#### **For Custom Server Directories:**
-- **"MyTavern"** → **"MyTavern Lorebook Protection Symlink"**
-- **"RoleplayHub"** → **"RoleplayHub Lorebook Protection Symlink"**
-- **"AIServer"** → **"AIServer Lorebook Protection Symlink"**
+## 🚀 Quick Start
 
-#### **Detection Methods:**
-1. **SillyTavern Directory Name** - Primary source (from index file path)
-2. **Script Source Path** - Detects from script.js loading path
-3. **Window Location** - From URL path directory
-4. **Document Title** - Secondary source
-5. **Meta Tags** - Custom server configuration
-6. **Domain Name** - From hostname
+### Basic Permission Management
+1. **Open** the admin panel using the 🔐 toggle button
+2. **Select** a character from the dropdown
+3. **Enter** the user ID to grant access to
+4. **Click** "Grant Access" to allow lorebook viewing
+5. **Revoke** access anytime using the same interface
 
-#### **Fallback:**
-If no custom name is detected, it defaults to **"SillyTavern Lorebook Protection Symlink"**.
+### Advanced Configuration
+- **Security Levels**: Choose protection strength
+- **Access Logging**: Monitor all permission changes
+- **Data Export**: Backup permission configurations
+- **Bulk Operations**: Manage multiple characters efficiently
 
-## 🎯 Features
+## 📚 Documentation
 
-### 🔒 Security Features
-- **SillyTavern-Only Access**: Restricts lorebook access to only through SillyTavern
-- **Creator/Owner Control**: Only character creators can manage their lorebooks
-- **Administrator Override**: Server admins have full access control
-- **Access Logging**: Comprehensive audit trail of all access attempts
-- **Real-time Validation**: Instant permission checking and enforcement
+### Core Files
+- `index.js` - Main extension logic and SillyTavern integration
+- `manifest.json` - Extension metadata and dependencies
+- `template.html` - Admin interface template
+- `style.css` - Complete styling and responsive design
 
-### 🎛️ Management Features
-- **Slash Commands**: `/lorebook-permissions` for quick management
-- **Web Interface**: Visual permission management through SillyTavern UI
-- **Bulk Operations**: Grant/revoke permissions for multiple users
-- **Permission Statistics**: View access patterns and usage statistics
-- **User-Friendly Alerts**: Clear permission status indicators
-
-### 🔧 Technical Features
-- **Zero Configuration**: Works out of the box with sensible defaults
-- **Performance Optimized**: Caching and efficient permission checking
-- **Responsive Design**: Works on all SillyTavern supported screen sizes
-- **Cross-Platform**: Compatible with Windows, macOS, and Linux
-- **Theme Integration**: Adapts to your SillyTavern theme automatically
-
-## 📋 Requirements
-
-- **SillyTavern 1.0.0+** (any recent version)
-- **Administrator access** (for initial setup)
-- **File system permissions** (for permission data storage)
-
-## 🚀 Getting Started
-
-### 1. Installation
-
-After installing the extension via SillyTavern's extension manager:
-
-1. **Navigate to Settings** → **Extensions**
-2. **Enable "SillyTavern Lorebook Admin"**
-3. **Restart SillyTavern** to activate the extension
-
-### 2. Initial Setup
-
-The first time you run SillyTavern after installation:
-
-1. **Open any character** → **Character Settings**
-2. **Click "🔐 Lorebook Permissions"** button
-3. **Configure initial permissions** for your characters
-4. **Save settings** to activate permission enforcement
-
-### 3. Basic Usage
-
-#### For Character Creators:
-- Your lorebooks are **automatically restricted** to you
-- Use the permission dialog to **grant access** to specific users
-- **Monitor access** through the permission status indicator
-
-#### For Server Administrators:
-- Access the **admin panel** from Settings
-- **Manage all permissions** across all characters
-- **View access logs** and security statistics
-- **Configure global settings** for the permission system
-
-#### For Regular Users:
-- **Access only lorebooks** you have permission for
-- **Request access** from character creators or administrators
-- **See clear status** indicators for accessibility
-
-## 💻 Usage Examples
-
-### Slash Commands
-
-```bash
-# List all permissions (admin only)
-/lorebook-permissions action=list
-
-# Check your access to a character
-/lorebook-permissions action=check character="My Character"
-
-# Grant permission to a user (admin only)
-/lorebook-permissions action=grant user="username" character="My Character"
-
-# Revoke permission from a user (admin only)
-/lorebook-permissions action=revoke user="username" character="My Character"
-```
-
-### Permission Management UI
-
-1. **Open character settings** → **Click "🔐 Lorebook Permissions"**
-2. **Select character** from the dropdown
-3. **Enter user ID** to grant/revoke access
-4. **Click appropriate button** to execute action
-5. **View current permissions** in the list below
-
-### Admin Panel Access
-
-1. **Go to Settings** → **Extensions**
-2. **Click "⚙️ Permission Admin"** (admin users only)
-3. **Navigate tabs**: Permissions, Logs, Statistics
-4. **Perform bulk operations** as needed
+### Documentation Files
+- `README.md` - This main documentation file
+- `INSTALLATION.md` - Detailed installation guide
+- `ARCHITECTURE.md` - Technical implementation details
+- `API.md` - Developer API reference
+- `TROUBLESHOOTING.md` - Common issues and solutions
 
 ## 🔧 Configuration
 
-The extension works with default settings, but you can customize:
-
 ### Extension Settings
-- **Enable/Disable** permission enforcement
-- **Configure admin override** behavior
-- **Set access logging** preferences
-- **Adjust caching** parameters
-- **Customize warning messages**
+```json
+{
+    "enabled": true,
+    "panelPosition": "right",
+    "securityLevel": "medium",
+    "autoCleanup": true,
+    "notificationEnabled": true
+}
+```
 
-### Access Control Settings
-- **Default permission level** for new characters
-- **Permission inheritance** rules
-- **Access timeout** settings
-- **User authentication** method
+### Permission Structure
+```json
+{
+    "permissions": {
+        "character_id": {
+            "owner": "user_id",
+            "allowedUsers": ["user_id1", "user_id2"],
+            "created": "2024-01-15T10:00:00Z"
+        }
+    }
+}
+```
 
 ## 🛡️ Security Features
 
-### Multi-Layer Protection
-1. **SillyTavern Context Validation**: Only works within SillyTavern
-2. **User Authentication**: Validates user identity
-3. **Permission Database**: Secure storage of access rules
-4. **Access Logging**: Comprehensive audit trail
-5. **Real-time Monitoring**: Instant violation detection
+### Access Control
+- **Path traversal protection** - Prevents malicious file access
+- **Origin validation** - Blocks unauthorized requests
+- **Rate limiting** - Prevents abuse and brute force attempts
+- **Audit logging** - Complete security event tracking
 
-### Access Control Types
-- **Owner Access**: Full control for character creators
-- **Read Access**: View-only permissions for granted users
-- **Admin Access**: Override capabilities for server administrators
-- **Denied Access**: Explicit blocking for unauthorized users
+### Permission Levels
+- **Low**: Basic protection with owner control
+- **Medium**: Standard protection with access logging
+- **High**: Maximum security with advanced monitoring
 
-## 📊 Monitoring & Logging
+## 🎯 Usage Examples
 
-### Access Logs
-- **Timestamp**: When access was attempted
-- **User Information**: Who attempted access
-- **Character Details**: Which lorebook was accessed
-- **Access Result**: Success or failure
-- **Client Information**: Browser and IP details
-
-### Statistics Dashboard
-- **Total Permissions**: Number of active permission rules
-- **Access Attempts**: Count of successful/denied attempts
-- **User Activity**: Most active users and characters
-- **Security Events**: Suspicious access patterns
-
-## 🔍 Troubleshooting
-
-### Common Issues
-
-**Extension not loading:**
-- Ensure SillyTavern is version 1.0.0+
-- Check browser console for errors
-- Verify installation in extensions directory
-
-**Permissions not working:**
-- Confirm extension is enabled in settings
-- Check if you're logged in as the correct user
-- Verify character ownership settings
-
-**Can't access admin panel:**
-- Ensure you have administrator privileges
-- Check admin user configuration
-- Verify server-side authentication
-
-### Debug Mode
-
-Enable debug logging by adding to your browser console:
+### Granting Access
 ```javascript
-localStorage.setItem('lorebook-permission-system_debug', 'true');
+// Through admin interface
+1. Select character "Character Name"
+2. Enter user ID "username123"
+3. Click "Grant Access"
 ```
 
-### Reset Extension
-
-To reset all extension data:
+### Checking Permissions
 ```javascript
-localStorage.removeItem('lorebook-permission-system_permissions');
-localStorage.removeItem('lorebook-permission-system_access_logs');
-localStorage.removeItem('lorebook-permission-system_settings');
+// Programmatically check access
+const hasAccess = LorebookProtectionSystem.checkPermission('character_id', 'user_id');
 ```
 
-## 📝 API Reference
-
-### Public Functions
-
-```javascript
-// Check if user has access to character lorebook
-LorebookPermissionSystem.checkPermission(characterId);
-
-// Grant permission to user
-LorebookPermissionSystem.grantPermission(userId, characterId);
-
-// Revoke permission from user
-LorebookPermissionSystem.revokePermission(userId, characterId);
-
-// List all permissions
-LorebookPermissionSystem.listPermissions();
-
-// Verify access attempt
-LorebookPermissionSystem.verifyLorebookAccess(data);
-```
-
-### Events
-
-The extension emits these events for integration:
-- `permissionGranted`: When access is granted
-- `permissionRevoked`: When access is revoked
-- `accessDenied`: When unauthorized access is attempted
-- `permissionUpdated`: When permissions are modified
-
-## 🔄 Updates
+## 🔄 Updates & Maintenance
 
 ### Automatic Updates
-- Extension checks for updates on SillyTavern restart
-- Updates are applied automatically if enabled
-- Configuration is preserved during updates
+- Extension checks for configuration changes
+- Seamless permission data migration
+- Backward compatibility maintained
 
-### Manual Updates
-1. Download latest extension ZIP
-2. Install via SillyTavern extension manager
-3. Existing settings are automatically migrated
+### Data Management
+- **Export permissions**: JSON format for backup
+- **Import permissions**: Restore from backup files
+- **Clear logs**: Remove access history
+- **Reset settings**: Return to default configuration
 
-## 🤝 Support
+## 🐛 Troubleshooting
 
-### Getting Help
-1. **Check this README** for common solutions
-2. **Review browser console** for error messages
-3. **Enable debug mode** for detailed logging
-4. **Visit SillyTavern documentation** for extension guidance
+### Common Issues
+- **Panel not visible**: Check if extension is enabled
+- **Permissions not working**: Verify server name detection
+- **Import/export errors**: Check file format and permissions
 
-### Bug Reports
-- Include SillyTavern version
-- Provide browser console errors
-- Describe steps to reproduce
-- Include extension settings if relevant
+### Debug Mode
+Enable console logging to troubleshoot issues:
+```javascript
+window.LorebookProtectionSystem.settings()
+```
 
-### Feature Requests
-- Post requests to SillyTavern forums
-- Describe use case and benefits
-- Consider implementation complexity
-- Provide mockups if UI-related
+## 🤝 Contributing
+
+### Development Setup
+1. Clone this repository
+2. Install dependencies
+3. Make changes to extension files
+4. Test in SillyTavern development environment
+5. Submit pull request with detailed description
+
+### Code Standards
+- Follow SillyTavern extension guidelines
+- Use proper event handling
+- Maintain responsive design
+- Include comprehensive error handling
 
 ## 📄 License
 
-This extension is released under **AGPL-3.0 License**. See LICENSE file for details.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 🙏 Credits
+## 🆘 Support
 
-- **SillyTavern Development Team** - Extension framework
-- **Community Contributors** - Testing and feedback
-- **Security Advisors** - Access control expertise
+### Getting Help
+- **GitHub Issues**: Report bugs and request features
+- **Documentation**: Check all available documentation files
+- **Community**: Join discussions in the repository
+
+### Contact
+- **Repository**: [selinawynters-ops/ST---Lorebook-Protection-Symlink](https://github.com/selinawynters-ops/ST---Lorebook-Protection-Symlink)
+- **Issues**: [GitHub Issues](https://github.com/selinawynters-ops/ST---Lorebook-Protection-Symlink/issues)
+
+## 🏆 Acknowledgments
+
+Based on the RPG Companion SillyTavern extension architecture, ensuring proper integration and compatibility with SillyTavern's extension system.
 
 ---
 
-**🔐 Remember**: This extension ensures your character lorebooks remain secure and accessible only to authorized users through SillyTavern's trusted interface.
-
-**⚠️ Important**: Always keep your SillyTavern installation updated and monitor access logs regularly for security.
+**Version**: 1.0.0  
+**Last Updated**: 2024-01-15  
+**Compatibility**: SillyTavern Latest

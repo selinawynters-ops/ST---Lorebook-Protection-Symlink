@@ -1,28 +1,58 @@
-// SillyTavern Lorebook Protection Extension
-// Working version - simplified and functional
+import { getContext, renderExtensionTemplateAsync, extension_settings as st_extension_settings } from '../../../extensions.js';
+import { eventSource, event_types, substituteParams, chat, saveSettingsDebounced, chat_metadata, saveChatDebounced, characters, this_chid } from '../../../../script.js';
+import { selected_group, getGroupMembers } from '../../../group-chats.js';
+import { power_user } from '../../../power-user.js';
 
-const MODULE_NAME = 'lorebook-protection';
+// Extension configuration
+const extensionName = 'sillytavern-lorebook-protection';
+const extensionFolderPath = `extensions/${extensionName}`;
+
+// State management
+let extensionSettings = {
+    enabled: true,
+    panelPosition: 'right',
+    permissions: {},
+    accessLogs: [],
+    securityLevel: 'medium',
+    autoCleanup: true,
+    notificationEnabled: true
+};
+
 let serverName = 'SillyTavern';
-let extensionSettings = {};
+let $panelContainer = null;
 
-// Initialize extension
-function initExtension() {
-    console.log(`[${MODULE_NAME}] Initializing Lorebook Protection Extension...`);
+/**
+ * Initialize the extension
+ */
+async function initExtension() {
+    console.log(`[${extensionName}] Initializing Lorebook Protection Extension...`);
     
-    // Detect server name
-    serverName = detectServerName();
-    console.log(`[${MODULE_NAME}] Detected server: ${serverName}`);
-    
-    // Load settings
-    loadSettings();
-    
-    // Add UI elements
-    addExtensionUI();
-    
-    console.log(`[${MODULE_NAME}] Extension initialized successfully`);
+    try {
+        // Load settings
+        loadSettings();
+        
+        // Detect server name
+        serverName = detectServerName();
+        console.log(`[${extensionName}] Detected server: ${serverName}`);
+        
+        // Add extension settings to Extensions tab
+        addExtensionSettings();
+        
+        // Initialize UI
+        await initUI();
+        
+        // Register event listeners
+        registerEventListeners();
+        
+        console.log(`[${extensionName}] Extension initialized successfully`);
+    } catch (error) {
+        console.error(`[${extensionName}] Initialization failed:`, error);
+    }
 }
 
-// Detect server name from URL/path
+/**
+ * Detect server name from various sources
+ */
 function detectServerName() {
     try {
         const pathname = window.location.pathname;
@@ -52,519 +82,635 @@ function detectServerName() {
         
         return 'SillyTavern';
     } catch (error) {
-        console.warn(`[${MODULE_NAME}] Error detecting server name:`, error);
+        console.warn(`[${extensionName}] Error detecting server name:`, error);
         return 'SillyTavern';
     }
 }
 
-// Load extension settings
+/**
+ * Load extension settings from localStorage
+ */
 function loadSettings() {
     try {
-        const saved = localStorage.getItem(`${MODULE_NAME}_settings`);
+        const saved = localStorage.getItem(`${extensionName}_settings`);
         if (saved) {
-            extensionSettings = JSON.parse(saved);
-        } else {
-            extensionSettings = {
-                enabled: true,
-                permissions: {},
-                logs: []
-            };
-            saveSettings();
+            extensionSettings = { ...extensionSettings, ...JSON.parse(saved) };
         }
     } catch (error) {
-        console.error(`[${MODULE_NAME}] Error loading settings:`, error);
-        extensionSettings = { enabled: true, permissions: {}, logs: [] };
+        console.error(`[${extensionName}] Error loading settings:`, error);
     }
 }
 
-// Save extension settings
+/**
+ * Save extension settings to localStorage
+ */
 function saveSettings() {
     try {
-        localStorage.setItem(`${MODULE_NAME}_settings`, JSON.stringify(extensionSettings));
+        localStorage.setItem(`${extensionName}_settings`, JSON.stringify(extensionSettings));
+        saveSettingsDebounced();
     } catch (error) {
-        console.error(`[${MODULE_NAME}] Error saving settings:`, error);
+        console.error(`[${extensionName}] Error saving settings:`, error);
     }
 }
 
-// Add extension UI elements
-function addExtensionUI() {
-    console.log(`[${MODULE_NAME}] Adding UI elements...`);
-    
-    // Add toolbar icon immediately
-    addToolbarIcon();
-    
-    // Wait for DOM to be fully loaded and try again
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(addToolbarIcon, 1000);
-            setTimeout(addSidebarIcon, 2000);
-        });
-    } else {
-        setTimeout(addToolbarIcon, 500);
-        setTimeout(addSidebarIcon, 1500);
-    }
-}
-
-// Add toolbar icon to main interface
-function addToolbarIcon() {
-    console.log(`[${MODULE_NAME}] Adding toolbar icon...`);
-    
-    // Remove existing icon if present
-    const existingIcon = document.getElementById('lorebook-protection-toolbar-icon');
-    if (existingIcon) {
-        existingIcon.remove();
-    }
-    
-    // Create toolbar icon
-    const icon = document.createElement('div');
-    icon.id = 'lorebook-protection-toolbar-icon';
-    icon.className = 'toolbar-icon';
-    icon.innerHTML = '🔐';
-    icon.title = `${serverName} Lorebook Admin`;
-    icon.style.cssText = `
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 32px;
-        height: 32px;
-        margin: 0 4px;
-        cursor: pointer;
-        border-radius: 4px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        font-size: 16px;
-        transition: all 0.2s ease;
-        position: relative;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        border: 1px solid rgba(255,255,255,0.2);
-        z-index: 1000;
-    `;
-    
-    // Add hover effects
-    icon.addEventListener('mouseenter', () => {
-        icon.style.transform = 'translateY(-2px)';
-        icon.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
-    });
-    
-    icon.addEventListener('mouseleave', () => {
-        icon.style.transform = 'translateY(0)';
-        icon.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-    });
-    
-    // Add click handler
-    icon.addEventListener('click', showPermissionModal);
-    
-    // Try to find toolbar and add icon
-    const toolbarSelectors = [
-        '#extensionsMenu',
-        '.extensions-menu',
-        '#extensions-menu',
-        '.extensions-menu-area',
-        '#top-bar-right',
-        '.top-bar-right',
-        '#header-buttons',
-        '.header-buttons',
-        '#menuBar',
-        '.menuBar',
-        '#main-toolbar',
-        '.toolbar'
-    ];
-    
-    let iconAdded = false;
-    
-    for (const selector of toolbarSelectors) {
-        const toolbar = document.querySelector(selector);
-        if (toolbar) {
-            toolbar.appendChild(icon);
-            console.log(`[${MODULE_NAME}] Icon added to ${selector}`);
-            iconAdded = true;
-            break;
-        }
-    }
-    
-    // If no toolbar found, add to body in top-right
-    if (!iconAdded) {
-        icon.style.position = 'fixed';
-        icon.style.top = '10px';
-        icon.style.right = '10px';
-        document.body.appendChild(icon);
-        console.log(`[${MODULE_NAME}] Icon added to body as fallback`);
-    }
-    
-    // Add floating backup icon
-    addFloatingIcon();
-}
-
-// Add floating backup icon
-function addFloatingIcon() {
-    // Remove existing if present
-    const existing = document.getElementById('lorebook-protection-floating-icon');
-    if (existing) {
-        existing.remove();
-    }
-    
-    const floatingIcon = document.createElement('div');
-    floatingIcon.id = 'lorebook-protection-floating-icon';
-    floatingIcon.innerHTML = '🔐';
-    floatingIcon.title = `${serverName} Lorebook Admin`;
-    floatingIcon.style.cssText = `
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        width: 50px;
-        height: 50px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 24px;
-        cursor: pointer;
-        z-index: 9999;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        transition: all 0.3s ease;
-        border: 2px solid rgba(255,255,255,0.2);
-    `;
-    
-    floatingIcon.addEventListener('click', showPermissionModal);
-    
-    floatingIcon.addEventListener('mouseenter', () => {
-        floatingIcon.style.transform = 'scale(1.1)';
-        floatingIcon.style.boxShadow = '0 6px 16px rgba(0,0,0,0.4)';
-    });
-    
-    floatingIcon.addEventListener('mouseleave', () => {
-        floatingIcon.style.transform = 'scale(1)';
-        floatingIcon.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
-    });
-    
-    document.body.appendChild(floatingIcon);
-    console.log(`[${MODULE_NAME}] Floating icon added`);
-}
-
-// Add sidebar icon
-function addSidebarIcon() {
-    console.log(`[${MODULE_NAME}] Adding sidebar icon...`);
-    
-    // Remove existing if present
-    const existing = document.getElementById('lorebook-protection-sidebar-icon');
-    if (existing) {
-        existing.remove();
-    }
-    
-    const sidebarIcon = document.createElement('div');
-    sidebarIcon.id = 'lorebook-protection-sidebar-icon';
-    sidebarIcon.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px;">
-            <span style="font-size: 18px;">🔐</span>
-            <span style="font-size: 12px; font-weight: 500;">Lorebook Admin</span>
-        </div>
-    `;
-    sidebarIcon.title = `${serverName} Lorebook Admin`;
-    sidebarIcon.style.cssText = `
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        border-radius: 6px;
-        margin: 5px 10px;
-        position: relative;
-        overflow: hidden;
-    `;
-    
-    sidebarIcon.addEventListener('click', showPermissionModal);
-    
-    sidebarIcon.addEventListener('mouseenter', () => {
-        sidebarIcon.style.transform = 'translateX(-5px)';
-        sidebarIcon.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
-    });
-    
-    sidebarIcon.addEventListener('mouseleave', () => {
-        sidebarIcon.style.transform = 'translateX(0)';
-        sidebarIcon.style.boxShadow = 'none';
-    });
-    
-    // Try to find sidebar
-    const sidebarSelectors = [
-        '#right-nav-panel',
-        '.right-nav-panel',
-        '#sidebar',
-        '.sidebar',
-        '#character-nav',
-        '.character-nav'
-    ];
-    
-    for (const selector of sidebarSelectors) {
-        const sidebar = document.querySelector(selector);
-        if (sidebar) {
-            sidebar.appendChild(sidebarIcon);
-            console.log(`[${MODULE_NAME}] Sidebar icon added to ${selector}`);
-            return;
-        }
-    }
-}
-
-// Show permission management modal
-function showPermissionModal() {
-    console.log(`[${MODULE_NAME}] Opening permission modal...`);
-    
-    // Remove existing modal
-    const existingModal = document.getElementById('lorebook-protection-modal');
-    if (existingModal) {
-        existingModal.remove();
-    }
-    
-    // Create modal
-    const modal = document.createElement('div');
-    modal.id = 'lorebook-protection-modal';
-    modal.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.5);
-        z-index: 10000;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    `;
-    
-    modal.innerHTML = `
-        <div style="
-            background: white;
-            border-radius: 12px;
-            padding: 25px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            position: relative;
-        ">
-            <h3 style="
-                color: #2c3e50;
-                margin-bottom: 20px;
-                font-size: 1.5em;
-            ">🔐 ${serverName} Lorebook Admin</h3>
-            
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 10px; font-weight: bold;">
-                    Character: 
-                    <select id="character-select" style="
-                        width: 100%;
-                        padding: 10px;
-                        border: 1px solid #ddd;
-                        border-radius: 6px;
-                        margin-top: 5px;
-                        font-size: 14px;
-                    ">
-                        <option value="">Select character...</option>
-                        <option value="character1">Sample Character 1</option>
-                        <option value="character2">Sample Character 2</option>
-                        <option value="character3">Sample Character 3</option>
-                    </select>
+/**
+ * Add extension settings to the Extensions tab
+ */
+function addExtensionSettings() {
+    const settingsHtml = `
+        <div class="inline-drawer">
+            <div class="inline-drawer-toggle inline-drawer-header">
+                <b><i class="fa-solid fa-shield-halved"></i> ${serverName} Lorebook Protection</b>
+                <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
+            </div>
+            <div class="inline-drawer-content">
+                <label class="checkbox_label" for="${extensionName}-enabled">
+                    <input type="checkbox" id="${extensionName}-enabled" />
+                    <span>Enable Lorebook Protection</span>
                 </label>
-                
-                <label style="display: block; margin-bottom: 15px; font-weight: bold;">
-                    User ID: 
-                    <input type="text" id="user-input" placeholder="Enter user ID..." style="
-                        width: 100%;
-                        padding: 10px;
-                        border: 1px solid #ddd;
-                        border-radius: 6px;
-                        margin-top: 5px;
-                        font-size: 14px;
-                    ">
-                </label>
-                
-                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                    <button onclick="grantPermission()" style="
-                        background: #27ae60;
-                        color: white;
-                        border: none;
-                        padding: 10px 20px;
-                        border-radius: 6px;
-                        cursor: pointer;
-                        font-size: 14px;
-                        flex: 1;
-                    ">Grant Access</button>
-                    
-                    <button onclick="revokePermission()" style="
-                        background: #e74c3c;
-                        color: white;
-                        border: none;
-                        padding: 10px 20px;
-                        border-radius: 6px;
-                        cursor: pointer;
-                        font-size: 14px;
-                        flex: 1;
-                    ">Revoke Access</button>
+                <small class="notes">Toggle to enable/disable the lorebook protection system. Configure additional settings within the panel itself.</small>
+
+                <div style="margin-top: 10px;">
+                    <label for="${extensionName}-security-level" class="checkbox_label">
+                        <select id="${extensionName}-security-level" style="margin-left: 10px;">
+                            <option value="low">Low - Basic protection</option>
+                            <option value="medium">Medium - Standard protection</option>
+                            <option value="high">High - Maximum security</option>
+                        </select>
+                        <span style="margin-left: 10px;">Security Level</span>
+                    </label>
+                </div>
+
+                <div style="margin-top: 10px; display: flex; gap: 10px;">
+                    <button id="${extensionName}-open-panel" class="menu_button" style="flex: 1;">
+                        <i class="fa-solid fa-shield-halved"></i> Open Admin Panel
+                    </button>
+                    <button id="${extensionName}-export-permissions" class="menu_button" style="flex: 1;">
+                        <i class="fa-solid fa-download"></i> Export Data
+                    </button>
                 </div>
             </div>
-            
-            <div style="
-                background: #f8f9fa;
-                padding: 15px;
-                border-radius: 6px;
-                margin-bottom: 20px;
-            ">
-                <h4 style="margin: 0 0 10px 0; color: #2c3e50;">Current Permissions</h4>
-                <div id="permissions-list" style="
-                    color: #666;
-                    font-style: italic;
-                    min-height: 50px;
-                ">No permissions set yet.</div>
-            </div>
-            
-            <div style="display: flex; gap: 10px;">
-                <button onclick="closeModal()" style="
-                    background: #95a5a6;
-                    color: white;
-                    border: none;
-                    padding: 10px 20px;
-                    border-radius: 6px;
-                    cursor: pointer;
-                    font-size: 14px;
-                    flex: 1;
-                ">Close</button>
-            </div>
         </div>
     `;
-    
-    document.body.appendChild(modal);
-    
-    // Close on backdrop click
-    modal.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            closeModal();
+
+    $('#extensions_settings2').append(settingsHtml);
+
+    // Set up event listeners
+    $(`#${extensionName}-enabled`).prop('checked', extensionSettings.enabled).on('change', function() {
+        extensionSettings.enabled = $(this).prop('checked');
+        saveSettings();
+        updatePanelVisibility();
+        
+        if (!extensionSettings.enabled) {
+            showNotification('Lorebook Protection disabled', 'warning');
+        } else {
+            showNotification('Lorebook Protection enabled', 'success');
         }
     });
-    
-    // Make functions globally available
-    window.closeModal = function() {
-        const modal = document.getElementById('lorebook-protection-modal');
-        if (modal) {
-            modal.remove();
-        }
-    };
-    
-    window.grantPermission = function() {
-        const character = document.getElementById('character-select').value;
-        const user = document.getElementById('user-input').value;
-        
-        if (character && user) {
-            if (!extensionSettings.permissions[character]) {
-                extensionSettings.permissions[character] = { allowedUsers: [] };
-            }
-            
-            if (!extensionSettings.permissions[character].allowedUsers.includes(user)) {
-                extensionSettings.permissions[character].allowedUsers.push(user);
-                saveSettings();
-                updatePermissionsList();
-                document.getElementById('user-input').value = '';
-                showMessage('Permission granted successfully!', 'success');
-            } else {
-                showMessage('User already has permission for this character.', 'warning');
-            }
+
+    $(`#${extensionName}-security-level`).val(extensionSettings.securityLevel).on('change', function() {
+        extensionSettings.securityLevel = $(this).val();
+        saveSettings();
+        showNotification(`Security level set to ${$(this).val()}`, 'info');
+    });
+
+    $(`#${extensionName}-open-panel`).on('click', function() {
+        if (extensionSettings.enabled) {
+            showPermissionModal();
         } else {
-            showMessage('Please select a character and enter a user ID.', 'error');
+            showNotification('Please enable Lorebook Protection first', 'warning');
         }
-    };
+    });
+
+    $(`#${extensionName}-export-permissions`).on('click', exportPermissionData);
+}
+
+/**
+ * Initialize the UI components
+ */
+async function initUI() {
+    // Load the HTML template using SillyTavern's template system
+    const templateHtml = await renderExtensionTemplateAsync(extensionName, 'template');
+
+    // Append panel to body
+    $('body').append(templateHtml);
+
+    // Cache UI elements
+    $panelContainer = $('#lorebook-protection-panel');
+
+    // Set up event listeners
+    setupUIEventListeners();
+
+    // Initialize UI state
+    updatePanelVisibility();
+    updatePermissionList();
+}
+
+/**
+ * Set up UI event listeners
+ */
+function setupUIEventListeners() {
+    // Panel toggle buttons
+    $('#lorebook-toggle-panel').on('click', togglePanel);
+    $('#lorebook-close-panel').on('click', closePanel);
+
+    // Permission management buttons
+    $('#lorebook-grant-permission').on('click', grantPermission);
+    $('#lorebook-revoke-permission').on('click', revokePermission);
+    $('#lorebook-clear-logs').on('click', clearAccessLogs);
+    $('#lorebook-refresh-list').on('click', updatePermissionList);
+
+    // Settings buttons
+    $('#lorebook-export-data').on('click', exportPermissionData);
+    $('#lorebook-import-data').on('click', importPermissionData);
+    $('#lorebook-reset-settings').on('click', resetSettings);
+
+    // Filter and search
+    $('#lorebook-search-characters').on('input', filterCharacterList);
+    $('#lorebook-filter-permissions').on('change', filterCharacterList);
+
+    // Character selection
+    $(document).on('click', '.lorebook-character-item', function() {
+        selectCharacter($(this).data('character-id'));
+    });
+}
+
+/**
+ * Register event listeners for SillyTavern events
+ */
+function registerEventListeners() {
+    // Character changed event
+    eventSource.on(event_types.CHACTER_UPDATED, onCharacterChanged);
     
-    window.revokePermission = function() {
-        const character = document.getElementById('character-select').value;
-        const user = document.getElementById('user-input').value;
-        
-        if (character && user) {
-            if (extensionSettings.permissions[character] && 
-                extensionSettings.permissions[character].allowedUsers.includes(user)) {
-                
-                extensionSettings.permissions[character].allowedUsers = 
-                    extensionSettings.permissions[character].allowedUsers.filter(u => u !== user);
-                saveSettings();
-                updatePermissionsList();
-                document.getElementById('user-input').value = '';
-                showMessage('Permission revoked successfully!', 'success');
-            } else {
-                showMessage('User does not have permission for this character.', 'warning');
-            }
-        } else {
-            showMessage('Please select a character and enter a user ID.', 'error');
-        }
-    };
+    // Chat loaded event
+    eventSource.on(event_types.CHAT_LOADED, onChatLoaded);
     
-    window.updatePermissionsList = function() {
-        const listDiv = document.getElementById('permissions-list');
-        if (!listDiv) return;
+    // Message sent event
+    eventSource.on(event_types.MESSAGE_SENT, onMessageSent);
+}
+
+/**
+ * Event handlers
+ */
+function onCharacterChanged(data) {
+    console.log(`[${extensionName}] Character changed:`, data);
+    updatePermissionList();
+}
+
+function onChatLoaded(data) {
+    console.log(`[${extensionName}] Chat loaded:`, data);
+    updatePermissionList();
+}
+
+function onMessageSent(data) {
+    // Log access attempts
+    logAccessAttempt(data.character, data.message, 'sent');
+}
+
+/**
+ * Show the permission management modal
+ */
+function showPermissionModal() {
+    $('#lorebook-protection-modal').removeClass('hidden');
+    updatePermissionList();
+}
+
+/**
+ * Hide the permission management modal
+ */
+function hidePermissionModal() {
+    $('#lorebook-protection-modal').addClass('hidden');
+}
+
+/**
+ * Toggle the admin panel
+ */
+function togglePanel() {
+    $panelContainer.toggleClass('expanded');
+    updateToggleButton();
+}
+
+/**
+ * Close the admin panel
+ */
+function closePanel() {
+    $panelContainer.removeClass('expanded');
+    updateToggleButton();
+}
+
+/**
+ * Update panel visibility based on settings
+ */
+function updatePanelVisibility() {
+    if (extensionSettings.enabled) {
+        $panelContainer.removeClass('hidden');
+    } else {
+        $panelContainer.addClass('hidden');
+    }
+}
+
+/**
+ * Update toggle button state
+ */
+function updateToggleButton() {
+    const $toggleBtn = $('#lorebook-toggle-panel');
+    const isExpanded = $panelContainer.hasClass('expanded');
+    
+    if (isExpanded) {
+        $toggleBtn.find('i').removeClass('fa-chevron-right').addClass('fa-chevron-down');
+        $toggleBtn.attr('title', 'Collapse Lorebook Protection Panel');
+    } else {
+        $toggleBtn.find('i').removeClass('fa-chevron-down').addClass('fa-chevron-right');
+        $toggleBtn.attr('title', 'Expand Lorebook Protection Panel');
+    }
+}
+
+/**
+ * Grant permission to a user
+ */
+function grantPermission() {
+    const characterId = $('#lorebook-character-select').val();
+    const userId = $('#lorebook-user-input').val().trim();
+    
+    if (!characterId) {
+        showNotification('Please select a character', 'error');
+        return;
+    }
+    
+    if (!userId) {
+        showNotification('Please enter a user ID', 'error');
+        return;
+    }
+    
+    if (!extensionSettings.permissions[characterId]) {
+        extensionSettings.permissions[characterId] = {
+            allowedUsers: [],
+            owner: getContext().characterId || 'unknown',
+            created: new Date().toISOString()
+        };
+    }
+    
+    if (!extensionSettings.permissions[characterId].allowedUsers.includes(userId)) {
+        extensionSettings.permissions[characterId].allowedUsers.push(userId);
+        saveSettings();
+        updatePermissionList();
         
-        let html = '';
-        for (const [character, permissions] of Object.entries(extensionSettings.permissions)) {
-            if (permissions.allowedUsers && permissions.allowedUsers.length > 0) {
-                html += `
-                    <div style="margin-bottom: 8px; padding: 8px; background: white; border-radius: 4px; border: 1px solid #ddd;">
-                        <strong>${character}:</strong> ${permissions.allowedUsers.join(', ')}
+        // Clear input
+        $('#lorebook-user-input').val('');
+        
+        showNotification(`Permission granted to ${userId}`, 'success');
+        
+        // Log the action
+        logAccessAttempt(characterId, `Permission granted to ${userId}`, 'admin');
+    } else {
+        showNotification('User already has permission for this character', 'warning');
+    }
+}
+
+/**
+ * Revoke permission from a user
+ */
+function revokePermission() {
+    const characterId = $('#lorebook-character-select').val();
+    const userId = $('#lorebook-user-input').val().trim();
+    
+    if (!characterId) {
+        showNotification('Please select a character', 'error');
+        return;
+    }
+    
+    if (!userId) {
+        showNotification('Please enter a user ID', 'error');
+        return;
+    }
+    
+    if (extensionSettings.permissions[characterId] && 
+        extensionSettings.permissions[characterId].allowedUsers.includes(userId)) {
+        
+        extensionSettings.permissions[characterId].allowedUsers = 
+            extensionSettings.permissions[characterId].allowedUsers.filter(u => u !== userId);
+        saveSettings();
+        updatePermissionList();
+        
+        // Clear input
+        $('#lorebook-user-input').val('');
+        
+        showNotification(`Permission revoked from ${userId}`, 'success');
+        
+        // Log the action
+        logAccessAttempt(characterId, `Permission revoked from ${userId}`, 'admin');
+    } else {
+        showNotification('User does not have permission for this character', 'warning');
+    }
+}
+
+/**
+ * Update the permission list display
+ */
+function updatePermissionList() {
+    const $listContainer = $('#lorebook-permissions-list');
+    const context = getContext();
+    
+    if (!context.characters || context.characters.length === 0) {
+        $listContainer.html('<div class="lorebook-empty-state">No characters found</div>');
+        return;
+    }
+    
+    // Update character select dropdown
+    const $select = $('#lorebook-character-select');
+    $select.empty().append('<option value="">Select character...</option>');
+    
+    let html = '';
+    
+    context.characters.forEach(character => {
+        const characterId = character.data?.extensions?.character_id || character.name;
+        const characterName = character.name || 'Unknown Character';
+        const permissions = extensionSettings.permissions[characterId];
+        
+        // Add to select dropdown
+        $select.append(`<option value="${characterId}">${characterName}</option>`);
+        
+        // Add to list
+        html += `
+            <div class="lorebook-character-item" data-character-id="${characterId}">
+                <div class="character-header">
+                    <h4>${characterName}</h4>
+                    <span class="character-id">${characterId}</span>
+                </div>
+                <div class="permission-info">
+                    <div class="permission-field">
+                        <label>Owner:</label>
+                        <span>${permissions?.owner || 'Not set'}</span>
                     </div>
-                `;
-            }
-        }
-        
-        if (html) {
-            listDiv.innerHTML = html;
-        } else {
-            listDiv.innerHTML = '<div style="color: #666; font-style: italic;">No permissions set yet.</div>';
-        }
-    };
-    
-    window.showMessage = function(message, type) {
-        // Create toast notification
-        const toast = document.createElement('div');
-        toast.textContent = message;
-        toast.style.cssText = `
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 12px 20px;
-            border-radius: 6px;
-            color: white;
-            font-weight: 500;
-            z-index: 10001;
-            transition: opacity 0.3s ease;
+                    <div class="permission-field">
+                        <label>Allowed Users:</label>
+                        <div class="user-list">
+                            ${permissions?.allowedUsers?.length > 0 
+                                ? permissions.allowedUsers.map(user => `<span class="user-tag">${user}</span>`).join('')
+                                : '<span class="no-users">No users granted</span>'
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
         `;
+    });
+    
+    $listContainer.html(html || '<div class="lorebook-empty-state">No permissions set</div>');
+}
+
+/**
+ * Filter character list based on search and filters
+ */
+function filterCharacterList() {
+    const searchTerm = $('#lorebook-search-characters').val().toLowerCase();
+    const filterType = $('#lorebook-filter-permissions').val();
+    
+    $('.lorebook-character-item').each(function() {
+        const $item = $(this);
+        const characterName = $item.find('h4').text().toLowerCase();
+        const characterId = $item.data('character-id');
+        const permissions = extensionSettings.permissions[characterId];
         
-        if (type === 'success') {
-            toast.style.background = '#27ae60';
-        } else if (type === 'warning') {
-            toast.style.background = '#f39c12';
-        } else {
-            toast.style.background = '#e74c3c';
+        let show = true;
+        
+        // Search filter
+        if (searchTerm && !characterName.includes(searchTerm)) {
+            show = false;
         }
         
-        document.body.appendChild(toast);
+        // Permission filter
+        if (filterType === 'has-permissions' && (!permissions || !permissions.allowedUsers?.length)) {
+            show = false;
+        } else if (filterType === 'no-permissions' && permissions?.allowedUsers?.length) {
+            show = false;
+        }
         
-        setTimeout(() => {
-            toast.style.opacity = '0';
-            setTimeout(() => {
-                if (toast.parentNode) {
-                    toast.parentNode.removeChild(toast);
-                }
-            }, 300);
-        }, 3000);
+        $item.toggle(show);
+    });
+}
+
+/**
+ * Log access attempts
+ */
+function logAccessAttempt(characterId, action, type = 'access') {
+    const logEntry = {
+        timestamp: new Date().toISOString(),
+        characterId,
+        action,
+        type,
+        user: getContext().user_avatar || 'unknown'
     };
     
-    // Initial permissions list update
-    updatePermissionsList();
+    extensionSettings.accessLogs.unshift(logEntry);
+    
+    // Keep only last 1000 entries
+    if (extensionSettings.accessLogs.length > 1000) {
+        extensionSettings.accessLogs = extensionSettings.accessLogs.slice(0, 1000);
+    }
+    
+    saveSettings();
+    updateLogDisplay();
 }
 
-// Initialize when DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initExtension);
-} else {
-    initExtension();
+/**
+ * Update access log display
+ */
+function updateLogDisplay() {
+    const $logContainer = $('#lorebook-access-logs');
+    const recentLogs = extensionSettings.accessLogs.slice(0, 50);
+    
+    if (recentLogs.length === 0) {
+        $logContainer.html('<div class="lorebook-empty-state">No access logs</div>');
+        return;
+    }
+    
+    const html = recentLogs.map(log => `
+        <div class="log-entry log-${log.type}">
+            <div class="log-time">${new Date(log.timestamp).toLocaleString()}</div>
+            <div class="log-character">${log.characterId}</div>
+            <div class="log-action">${log.action}</div>
+        </div>
+    `).join('');
+    
+    $logContainer.html(html);
 }
 
-// Also try to initialize after a delay (for dynamic pages)
-setTimeout(initExtension, 2000);
+/**
+ * Clear access logs
+ */
+function clearAccessLogs() {
+    if (confirm('Are you sure you want to clear all access logs?')) {
+        extensionSettings.accessLogs = [];
+        saveSettings();
+        updateLogDisplay();
+        showNotification('Access logs cleared', 'success');
+    }
+}
 
-console.log(`[${MODULE_NAME}] Lorebook Protection Extension loaded`);
+/**
+ * Export permission data
+ */
+function exportPermissionData() {
+    const exportData = {
+        version: '1.0.0',
+        timestamp: new Date().toISOString(),
+        serverName,
+        settings: extensionSettings
+    };
+    
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(dataBlob);
+    link.download = `lorebook-protection-${serverName}-${Date.now()}.json`;
+    link.click();
+    
+    showNotification('Permission data exported', 'success');
+}
+
+/**
+ * Import permission data
+ */
+function importPermissionData() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    
+    input.onchange = function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            try {
+                const importData = JSON.parse(event.target.result);
+                
+                if (importData.settings) {
+                    extensionSettings = { ...extensionSettings, ...importData.settings };
+                    saveSettings();
+                    updatePermissionList();
+                    updateLogDisplay();
+                    showNotification('Permission data imported successfully', 'success');
+                } else {
+                    showNotification('Invalid import file format', 'error');
+                }
+            } catch (error) {
+                console.error('Import error:', error);
+                showNotification('Failed to import permission data', 'error');
+            }
+        };
+        
+        reader.readAsText(file);
+    };
+    
+    input.click();
+}
+
+/**
+ * Reset extension settings
+ */
+function resetSettings() {
+    if (confirm('Are you sure you want to reset all settings? This will clear all permissions and logs.')) {
+        extensionSettings = {
+            enabled: true,
+            panelPosition: 'right',
+            permissions: {},
+            accessLogs: [],
+            securityLevel: 'medium',
+            autoCleanup: true,
+            notificationEnabled: true
+        };
+        
+        saveSettings();
+        updatePermissionList();
+        updateLogDisplay();
+        
+        // Update UI controls
+        $(`#${extensionName}-enabled`).prop('checked', true);
+        $(`#${extensionName}-security-level`).val('medium');
+        
+        showNotification('Settings reset to defaults', 'success');
+    }
+}
+
+/**
+ * Select a character in the list
+ */
+function selectCharacter(characterId) {
+    $('#lorebook-character-select').val(characterId);
+    
+    // Highlight selected item
+    $('.lorebook-character-item').removeClass('selected');
+    $(`.lorebook-character-item[data-character-id="${characterId}"]`).addClass('selected');
+}
+
+/**
+ * Show notification toast
+ */
+function showNotification(message, type = 'info') {
+    if (!extensionSettings.notificationEnabled) return;
+    
+    const toast = $(`
+        <div class="lorebook-toast lorebook-toast-${type}">
+            <i class="fa-solid fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+            <span>${message}</span>
+        </div>
+    `);
+    
+    $('body').append(toast);
+    
+    // Animate in
+    setTimeout(() => toast.addClass('show'), 100);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        toast.removeClass('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+/**
+ * Check if user has permission for character
+ */
+function checkPermission(characterId, userId) {
+    const permissions = extensionSettings.permissions[characterId];
+    const context = getContext();
+    
+    // Owner always has access
+    if (permissions?.owner === userId) {
+        return true;
+    }
+    
+    // Check allowed users
+    if (permissions?.allowedUsers?.includes(userId)) {
+        return true;
+    }
+    
+    // Admin override (if implemented)
+    if (context.user && context.user.admin) {
+        return true;
+    }
+    
+    return false;
+}
+
+/**
+ * Make functions globally available for debugging
+ */
+window.LorebookProtectionSystem = {
+    checkPermission,
+    grantPermission,
+    revokePermission,
+    settings: () => extensionSettings,
+    showPermissionModal,
+    exportPermissionData,
+    importPermissionData
+};
+
+// Initialize when SillyTavern is ready
+jQuery(async () => {
+    await initExtension();
+    console.log(`[${extensionName}] Lorebook Protection Extension loaded`);
+});

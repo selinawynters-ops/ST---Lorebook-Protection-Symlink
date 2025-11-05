@@ -1,9 +1,11 @@
 {
-    "name": "ST-- Lorebook Protection Symlink",
-    "description": "Secure lorebook permission management with symlink-based access control",
+    "display_name": "ST-- Lorebook Protection Symlink",
+    "loading_order": 100,
+    "requires": [],
+    "optional": [],
+    "js": "index.js",
+    "css": "style.css",
+    "author": "Lorebook Protection System",
     "version": "1.0.0",
-    "author": "SillyTavern Extension",
-    "website": "",
-    "tags": ["lorebook", "permissions", "security", "admin", "symlink"],
-    "main": "index.js"
+    "homePage": "https://github.com/selinawynters-ops/ST---Lorebook-Protection-Symlink"
 }
