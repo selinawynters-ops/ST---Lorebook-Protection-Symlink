@@ -3,30 +3,32 @@
 /* Main Panel */
 .lorebook-protection-panel {
     position: fixed;
-    top: 60px;
-    right: 0;
-    width: 350px;
-    max-height: calc(100vh - 80px);
+    top: 0;
+    left: 50%;
+    width: 90%;
+    max-width: 800px;
+    max-height: 80vh;
     background: var(--SmartThemeBodyColor);
     border: 1px solid var(--SmartThemeBorderColor);
-    border-left: 2px solid #667eea;
-    border-radius: 8px 0 0 8px;
-    box-shadow: -4px 0 12px rgba(0,0,0,0.15);
+    border-top: 3px solid #667eea;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     z-index: 1000;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     font-family: var(--mainFontFamily);
+    overflow: hidden;
 }
 
 .lorebook-protection-panel.expanded {
-    transform: translateX(0);
+    transform: translateX(-50%) translateY(0);
 }
 
 .lorebook-protection-panel:not(.expanded) {
-    transform: translateX(320px);
+    transform: translateX(-50%) translateY(-100%);
 }
 
 .lorebook-protection-panel:hover {
-    box-shadow: -6px 0 16px rgba(0,0,0,0.25);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.25);
 }
 
 /* Toggle Button - Removed (no longer needed) */
@@ -619,12 +621,12 @@
 /* Responsive Design */
 @media (max-width: 768px) {
     .lorebook-protection-panel {
-        width: 300px;
-        top: 50px;
+        width: 95%;
+        max-width: none;
     }
     
     .lorebook-protection-panel:not(.expanded) {
-        transform: translateX(270px);
+        transform: translateX(-50%) translateY(-100%);
     }
     
     .modal-content {

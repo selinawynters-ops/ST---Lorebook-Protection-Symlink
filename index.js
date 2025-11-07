@@ -186,7 +186,7 @@ function addExtensionSettings() {
 
     $(`#${extensionName}-open-panel`).on('click', function() {
         if (extensionSettings.enabled) {
-            showPermissionModal();
+            openPanel();
         } else {
             showNotification('Please enable Lorebook Protection first', 'warning');
         }
@@ -290,6 +290,14 @@ function showPermissionModal() {
  */
 function hidePermissionModal() {
     $('#lorebook-protection-modal').addClass('hidden');
+}
+
+/**
+ * Open the admin panel
+ */
+function openPanel() {
+    $panelContainer.addClass('expanded');
+    updatePermissionList();
 }
 
 /**
