@@ -55,31 +55,41 @@ async function initExtension() {
  */
 function detectServerName() {
     try {
-        const pathname = window.location.pathname;
-        const hostname = window.location.hostname;
+        // Priority 1: Try to get from document title (e.g., "DreamTavern is running 1.13.5")
+        const title = document.title;
+        if (title) {
+            // Match pattern: "ServerName is running X.X.X" or just "ServerName"
+            const titleMatch = title.match(/^([^\s]+)/);
+            if (titleMatch && titleMatch[1] && titleMatch[1] !== 'SillyTavern') {
+                const serverName = titleMatch[1];
+                console.log(`[${extensionName}] Detected server from title: ${serverName}`);
+                return serverName;
+            }
+        }
         
-        // Try to extract from pathname
+        // Priority 2: Try to extract from pathname
+        const pathname = window.location.pathname;
         const pathMatch = pathname.match(/\/([^\/]+)/);
         if (pathMatch && pathMatch[1]) {
             let cleanName = pathMatch[1].replace(/-(st|sillytavern|public)$/i, '');
             if (cleanName && cleanName !== 'public' && cleanName !== 'st') {
-                return cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+                const serverName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+                console.log(`[${extensionName}] Detected server from path: ${serverName}`);
+                return serverName;
             }
         }
         
-        // Try to extract from hostname
+        // Priority 3: Try to extract from hostname
+        const hostname = window.location.hostname;
         const domainMatch = hostname.match(/([^\.]+)\./);
         if (domainMatch && domainMatch[1]) {
             let domainName = domainMatch[1].replace(/-/g, ' ');
-            return domainName.charAt(0).toUpperCase() + domainName.slice(1);
+            const serverName = domainName.charAt(0).toUpperCase() + domainName.slice(1);
+            console.log(`[${extensionName}] Detected server from hostname: ${serverName}`);
+            return serverName;
         }
         
-        // Try to get from document title
-        const title = document.title;
-        if (title && title !== 'SillyTavern') {
-            return title.replace('SillyTavern', '').trim() || 'SillyTavern';
-        }
-        
+        console.log(`[${extensionName}] Using default server name: SillyTavern`);
         return 'SillyTavern';
     } catch (error) {
         console.warn(`[${extensionName}] Error detecting server name:`, error);
@@ -211,8 +221,7 @@ async function initUI() {
  * Set up UI event listeners
  */
 function setupUIEventListeners() {
-    // Panel toggle buttons
-    $('#lorebook-toggle-panel').on('click', togglePanel);
+    // Panel close button
     $('#lorebook-close-panel').on('click', closePanel);
 
     // Permission management buttons
@@ -284,19 +293,10 @@ function hidePermissionModal() {
 }
 
 /**
- * Toggle the admin panel
- */
-function togglePanel() {
-    $panelContainer.toggleClass('expanded');
-    updateToggleButton();
-}
-
-/**
  * Close the admin panel
  */
 function closePanel() {
     $panelContainer.removeClass('expanded');
-    updateToggleButton();
 }
 
 /**
@@ -307,22 +307,6 @@ function updatePanelVisibility() {
         $panelContainer.removeClass('hidden');
     } else {
         $panelContainer.addClass('hidden');
-    }
-}
-
-/**
- * Update toggle button state
- */
-function updateToggleButton() {
-    const $toggleBtn = $('#lorebook-toggle-panel');
-    const isExpanded = $panelContainer.hasClass('expanded');
-    
-    if (isExpanded) {
-        $toggleBtn.find('i').removeClass('fa-chevron-right').addClass('fa-chevron-down');
-        $toggleBtn.attr('title', 'Collapse Lorebook Protection Panel');
-    } else {
-        $toggleBtn.find('i').removeClass('fa-chevron-down').addClass('fa-chevron-right');
-        $toggleBtn.attr('title', 'Expand Lorebook Protection Panel');
     }
 }
 
